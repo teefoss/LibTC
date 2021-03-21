@@ -1,6 +1,8 @@
 > Any sufficiently advanced technology is indistinguishable from magic.
 > -- <cite>Clark's Third Law
 
+![The LibDOS logo. Max cool.](https://github.com/xiphiasnonus/LibDOS/blob/master/screenshots/logo.png)
+
 LibDOS is some sort of MS-DOS-like terminal, using a partial implementation of Turbo C. Development in progress.
 
 - See the wiki for documentation (coming soon-ish)
