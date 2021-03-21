@@ -21,5 +21,6 @@ void bordercolor(int newcolor);
 
 void sound(unsigned frequency, unsigned milliseconds);
 
+void savescr(const char *file);
 
 #endif /* dos_h_ */

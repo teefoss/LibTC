@@ -10,6 +10,6 @@ LibDOS is some sort of MS-DOS-like terminal, using a partial implementation of T
 
 - Nobody
 - Someone learning to program
-- Anyone how needs retro terminal graphics, e.g., for an ASCII game (c.f. Draw Fortress, etc.)
+- Anyone how needs retro terminal graphics, e.g., for an ASCII game (c.f. Dwarf Fortress, etc.)
 - Anyone who wants to use this library
 

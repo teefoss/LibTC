@@ -1,28 +1,22 @@
-CFLAGS=-Wall -Wextra -Werror -Wshadow -g -ansi -pedantic
+TARGET=libdos.a
+CFLAGS=-Wall
 LIBS=-lSDL2
 INCL=-Iinclude -Isrc/include
-INT=src/include/internal.h
-AR=libdos.a
-O=obj
-OBJS=$(O)/dos.o \
-	$(O)/conio.o \
-	$(O)/graphics.o \
-	$(O)/font.o
+OBJS=dos.o conio.o graphics.o font.o
 
-all: lib test
+$(TARGET): $(OBJS)
+	ar rcs $(TARGET) $^
 
-lib: $(OBJS)
-	ar rcs $(AR) $^
-
-$(O)/%.o: src/%.c include/%.h $(INT)
+%.o: src/%.c include/%.h src/include/internal.h
 	cc -c $< -o $@ $(INCL) $(CFLAGS)
 
-$(O)/font.o: src/font.c
-	cc -c src/font.c -o $@ $(INCL) $(CFLAGS)
-	
-test: test.c $(OBJS)
-	cc $< -o $@ $(LIBS) -ldos $(INCL)
-		
+font.o: src/font.c
+	cc -c $^ -o $@ $(CFLAGS)
+
+install: $(TARGET)
+	cp $(TARGET) /usr/local/lib
+	cp include/* /usr/local/include
+
 .PHONY: clean
 clean:
-	@rm -rf $(O)/* test $(AR)
+	@rm -rf *.o $(TARGET)

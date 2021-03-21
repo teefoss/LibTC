@@ -538,3 +538,21 @@ void bordercolor(int newcolor)
 {
     bdrcolor = (unsigned char)newcolor;
 }
+
+
+void savescr(const char *file)
+{
+    SDL_Surface *save;
+
+    refresh();
+    save = SDL_GetWindowSurface(win);
+    
+    if ( save == NULL ) {
+        puts("savescr: could not create surface!");
+        return;
+    }
+    
+    if ( SDL_SaveBMP(save, file) != 0 ) {
+        printf("savescr: could not save bmp!");
+    }
+}
