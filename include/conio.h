@@ -46,7 +46,7 @@ typedef enum keys
     KP_7,
     KP_8,
     KP_9,
-    KP_0,
+    KP_0
 } KEY;
 
 typedef enum

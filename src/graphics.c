@@ -6,7 +6,7 @@ int bkcolor;
 void cleardevice(void)
 {
     clrscr();
-    _setcga(bkcolor);
+    dos_setcga(bkcolor);
     SDL_RenderClear(renderer);
 }
 
@@ -16,16 +16,16 @@ void setbkcolor(int color)
 }
 
 
-int  textheight(void)
+int textheight(void)
 {
-    return _textheight;
+    return text.char_h;
 }
 
 
 int textwidth(char *textstring)
 {
     if ( textstring ) {
-        return strlen(textstring) * _textwidth;
+        return strlen(textstring) * text.char_w;
     }
     return 0;
 }

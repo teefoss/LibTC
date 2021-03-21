@@ -5,33 +5,33 @@
 
 #define CLAMP(x,low,high)  (((x)>(high))?(high):(((x)<(low))?(low):(x)))
 
-inbuf_t kb;
-inbuf_t _mousebuf;
+queue_t keybuf;
+queue_t mousebuf;
 
-static void _newline()
+static void newline()
 {
-    textinfo.curx = _base;
+    text.info.curx = base;
     
-    if ( textinfo.cury < textinfo.screenheight - 1 + _base ) {
-        textinfo.cury++;
+    if ( text.info.cury < text.info.screenheight - 1 + base ) {
+        text.info.cury++;
     }
 }
 
 
-static void _advancecursor(int amount)
+static void advancecursor(int amount)
 {
-    textinfo.curx += amount;
+    text.info.curx += amount;
     
-    if ( textinfo.curx > textinfo.screenwidth - 1 + _base ) {
-        _newline();
+    if ( text.info.curx > text.info.screenwidth - 1 + base ) {
+        newline();
     }
 }
 
 
-static void _tab()
+static void tab()
 {
-    while ( textinfo.curx % 4 != 0 )
-        _advancecursor(1);
+    while ( text.info.curx % 4 != 0 )
+        advancecursor(1);
 }
 
 
@@ -42,31 +42,32 @@ void clreol(void)
     short *cell;
     int count;
     int x, y;
+    int i;
     
-    cell = _curtxtbufcell();
-    x = textinfo.curx - _base;
-    y = textinfo.cury - _base;
-    count = textinfo.screenwidth - x;
+    cell = dos_currentcell();
+    x = text.info.curx - base;
+    y = text.info.cury - base;
+    count = text.info.screenwidth - x;
     
-    for ( int i = 0; i < count; i++, cell++ ) {
+    for ( i = 0; i < count; i++, cell++ ) {
         printf("x: %d\n", x);
         *cell &= 0xFF00; /* clear char info */
-        _drawchar(*cell, x++, y);
+        dos_drawchar(*cell, x++, y);
     }
 }
 
 
 void clrscr()
 {
-    if ( _textbuffer ) {
-        memset(_textbuffer, 0, TXTBUFSIZE);
+    if ( text.buf ) {
+        memset(text.buf, 0, TXTBUFSIZE);
     }
     
-    textinfo.attribute = LIGHTGRAY;
-    textinfo.curx = _base;
-    textinfo.cury = _base;
+    text.info.attribute = LIGHTGRAY;
+    text.info.curx = base;
+    text.info.cury = base;
     
-    _setcga(BLACK);
+    dos_setcga(BLACK);
     SDL_RenderClear(renderer); /* target is screen texture */
 }
 
@@ -83,11 +84,12 @@ int gettext(int left, int top, int right, int bottom, void *destin)
     short *cell;
     int x, y;
     int w, h;
+    int i;
     
-    if (left < _base
-        || top < _base
-        || right > _maxtextx()
-        || bottom >= _maxtexty()) {
+    if (left < base
+        || top < base
+        || right > dos_maxx()
+        || bottom >= dos_maxy()) {
         return 0;
     }
     
@@ -95,21 +97,21 @@ int gettext(int left, int top, int right, int bottom, void *destin)
         return 0;
     }
     
-    x = left - _base;
-    y = top - _base;
+    x = left - base;
+    y = top - base;
     w = right - left + 1;
     h = bottom - top + 1;
-    cell = _txtbufcell(x, y);
+    cell = dos_cell(x, y);
     
-    for ( int i = 0; i < h; i++ ) {
+    for ( i = 0; i < h; i++ ) {
         check = memcpy(destin, (void *)cell, w * sizeof(short));
         
         if ( check != destin ) {
             return 0;
         }
         
-        cell += textinfo.screenwidth;
-        destin += w * 2;
+        cell += text.info.screenwidth;
+        destin = (char *)destin + w * 2;
     }
     
     return 1;
@@ -118,23 +120,23 @@ int gettext(int left, int top, int right, int bottom, void *destin)
 
 short *gettextbuffer(void)
 {
-    return _textbuffer;
+    return text.buf;
 }
 
 
 void gettextinfo(TEXT_INFO *r)
 {
-    *r = textinfo;
+    *r = text.info;
 }
 
 
 void gotoxy(int x, int y)
 {
-    textinfo.curx = x;
-    textinfo.cury = y;
+    text.info.curx = x;
+    text.info.cury = y;
 }
 
-
+/* TODO: this is fucked */
 int puttext(int left, int top, int right, int bottom, void *source)
 {
     /* TODO: error handling */
@@ -142,8 +144,8 @@ int puttext(int left, int top, int right, int bottom, void *source)
     short *cell;
     int i, x1, y1;
     
-    x = left - _base;
-    y = top - _base;
+    x = left - base;
+    y = top - base;
     w = right - left + 1;
     h = bottom - top + 1;
     
@@ -151,7 +153,7 @@ int puttext(int left, int top, int right, int bottom, void *source)
 
     for ( y1=y, i=0 ; y1<y+h ; y1++ ) {
         for ( x1=x ; x1<x+w ; x++ ) {
-            _textbuffer[y1 * textinfo.screenwidth + x1] = cell[i++];
+            text.buf[y1 * text.info.screenwidth + x1] = cell[i++];
         }
     }
     
@@ -161,21 +163,21 @@ int puttext(int left, int top, int right, int bottom, void *source)
 
 void textattr(int newattr)
 {
-    textinfo.attribute = newattr;
+    text.info.attribute = newattr;
 }
 
 
 void textbackground(int newcolor)
 {
-    textinfo.attribute &= 0x0F;
-    textinfo.attribute |= (newcolor << 4);
+    text.info.attribute &= 0x0F;
+    text.info.attribute |= (newcolor << 4);
 }
 
 
 void textcolor(int newcolor)
 {
-    textinfo.attribute &= 0xF0;
-    textinfo.attribute |= newcolor;
+    text.info.attribute &= 0xF0;
+    text.info.attribute |= newcolor;
 }
 
 
@@ -184,35 +186,33 @@ void textmode(int newmode)
     switch ( newmode ) {
         case BW40:
         case C40:
-            _textheight = MODE40H;
-            textinfo.screenwidth = 40;
-            fontdata = fontdata40;
+            text.char_h = MODE40H;
+            text.info.screenwidth = 40;
             break;
         case BW80:
         case C80:
-            _textheight = MODE80H;
-            textinfo.screenwidth = 80;
-            fontdata = fontdata80;
+            text.char_h = MODE80H;
+            text.info.screenwidth = 80;
             break;
         default:
             return; /* bad mode */
     }
     
-    textinfo.screenheight = 25;
-    textinfo.currmode = newmode;
+    text.info.screenheight = 25;
+    text.info.currmode = newmode;
     clrscr();
 }
 
 
 int  wherex(void)
 {
-    return textinfo.curx;
+    return text.info.curx;
 }
 
 
 int  wherey(void)
 {
-    return textinfo.cury;
+    return text.info.cury;
 }
 
 
@@ -222,10 +222,10 @@ int mousex(void)
     int maxx;
     
     SDL_GetMouseState(&x, NULL);
-    x /= _scale();
+    x /= dos_scale();
     x -= bordersize;
-    maxx = textinfo.screenwidth * _textwidth - 1;
-    x = _clamp(x, 0, maxx);
+    maxx = text.info.screenwidth * text.char_w - 1;
+    x = dos_clamp(x, 0, maxx);
     
     return x;
 }
@@ -236,10 +236,10 @@ int mousey(void)
     int y, maxy;
     
     SDL_GetMouseState(NULL, &y);
-    y /= _scale();
+    y /= dos_scale();
     y -= bordersize;
-    maxy = textinfo.screenheight * _textheight - 1;
-    y = _clamp(y, 0, maxy);
+    maxy = text.info.screenheight * text.char_h - 1;
+    y = dos_clamp(y, 0, maxy);
     
     return y;
 }
@@ -247,29 +247,29 @@ int mousey(void)
 
 void window(int left, int top, int right, int bottom)
 {
-    textinfo.winleft = left;
-    textinfo.wintop = top;
-    textinfo.winright = right;
-    textinfo.winbottom = bottom;
+    text.info.winleft = left;
+    text.info.wintop = top;
+    text.info.winright = right;
+    text.info.winbottom = bottom;
 }
 
 
 int kbhit()
 {
-    return kb.top;
+    return keybuf.count;
 }
 
 
 int mousehit()
 {
-    return _mousebuf.top;
+    return mousebuf.count;
 }
 
 
 int getch()
 {
-    if ( kb.top ) {
-        return kb.buffer[--kb.top];
+    if ( keybuf.count ) {
+        return keybuf.data[--keybuf.count];
     }
     return 0;
 }
@@ -277,31 +277,28 @@ int getch()
 
 int getmouse()
 {
-    if ( _mousebuf.top ) {
-        return _mousebuf.buffer[--_mousebuf.top];
+    if ( mousebuf.count ) {
+        return mousebuf.data[--mousebuf.count];
     }
     return 0;
 }
 
-
-//char *cgets(char *str)
-//{
-//
-//}
 
 
 int cprintf(const char *format, ...)
 {
     const int size = 0x80;
     va_list args;
-    char buffer[size] = { 0 };
+    char *buffer;
     int ret;
     
+    buffer = calloc(size, sizeof(char));
     va_start(args, format);
     vsnprintf(buffer, size, format, args);
     ret = cputs(buffer);
     va_end(args);
     
+    free(buffer);
     return ret;
 }
 
@@ -315,10 +312,10 @@ int cputs(const char *str)
     {
         switch ( *c ) {
             case '\n':
-                _newline();
+                newline();
                 break;
             case '\t':
-                _tab();
+                tab();
                 break;
             default:
                 ret = putch(*c);
@@ -329,12 +326,6 @@ int cputs(const char *str)
     
     return ret;
 }
-
-
-//int  cscanf(const char *format, ...)
-//{
-//
-//}
 
 
 int  getche(void)
@@ -348,18 +339,15 @@ int putch(int c)
     short * cell;
     int x, y;
 
-    x = textinfo.curx - _base;
-    y = textinfo.cury - _base;
-    
-//    if ( x < 0 || y < 0 || (x + _base) * (y + _base) > TXTBUFSIZE )
-//        return -1;
-    
-    cell = &_textbuffer[y * textinfo.screenwidth + x];
+    x = text.info.curx - base;
+    y = text.info.cury - base;
+        
+    cell = &text.buf[y * text.info.screenwidth + x];
     *cell = (unsigned char)c;
-    *cell |= textinfo.attribute << 8;
+    *cell |= text.info.attribute << 8;
     
-    _drawchar(*cell, x, y);
-    _advancecursor(1);
+    dos_drawchar(*cell, x, y);
+    advancecursor(1);
     
     return c;
 }
@@ -374,6 +362,6 @@ int  ungetch(int ch)
 
 void setbase(int index)
 {
-    _base = index;
+    base = index;
 }
 

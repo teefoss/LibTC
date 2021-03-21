@@ -4,8 +4,8 @@
 #include "conio.h"
 #include <SDL2/SDL.h>
 
-#define TXTBUFSIZE  (textinfo.screenwidth * textinfo.screenheight * 2)
-#define INBUFSIZE  0x80
+#define TXTBUFSIZE  (text.info.screenwidth * text.info.screenheight * 2)
+#define QUEUE_SIZE  0x80
 #define MODE40H     8
 #define MODE80H     16
 
@@ -14,43 +14,40 @@
 #define CELL_BG(cell)  (((cell) & 0xF000) >> 12)
 #define CELL_FG(cell)  (((cell) & 0x0F00) >> 8)
 
-// input buffer
+typedef enum { NO, YES } BOOL;
+typedef unsigned char   uchar;
+typedef unsigned short  ushort;
+
 typedef struct
 {
-    int top;
-    int buffer[INBUFSIZE];
-} inbuf_t;
+    int count;
+    int data[QUEUE_SIZE];
+} queue_t;
 
-extern const unsigned char fontdata40[];
-extern const unsigned char fontdata80[];
-const unsigned char * fontdata; /* current data, 40 or 80 */
+typedef struct
+{
+    short * buf;
+    TEXT_INFO info;
+    int char_w;
+    int char_h;
+} text_t;
 
 extern SDL_Renderer * renderer;
 
-extern inbuf_t kb;
-extern inbuf_t _mousebuf;
+extern queue_t  keybuf;
+extern queue_t  mousebuf;
+extern text_t   text;
+extern uchar    bordersize;
+extern int      base;
+extern int      bkcolor;
 
-extern short *      _textbuffer;
-extern TEXT_INFO    textinfo;
-extern const int    _textwidth;
-extern int          _textheight;
-
-extern unsigned char bordersize;
-
-extern int _base;
-
-/* graphics.c */
-
-extern int bkcolor;
-
-int  _clamp(int x, int min, int max);
-int  _scale();
-void _setcga(COLOR c);
-void _drawchar(short cell, int x, int y);
-
-short * _txtbufcell(int x, int y);
-short * _curtxtbufcell(void);
-int _maxtextx();
-int _maxtexty();
+int     dos_clamp(int x, int min, int max);
+int     dos_scale(void);
+void    dos_setcga(COLOR c);
+void    dos_drawchar(short cell, int x, int y);
+short * dos_cell(int x, int y); /* text buf cell at x, y */
+short * dos_currentcell(void); /* text buf cell for current cursor */
+int     dos_maxx(); /* text buffer cell x value */
+int     dos_maxy();
 
 #endif /* dos_internal_h */
