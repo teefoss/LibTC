@@ -1,17 +1,12 @@
-# README
+![The LibDOS logo. Max cool.](https://github.com/teefoss/LibDOS/blob/master/screenshots/logo.png)
 
 > Any sufficiently advanced technology is indistinguishable from magic.
 >
 > &mdash; <cite>Clark's Third Law</cite>
 
-![The LibDOS logo. Max cool.](https://github.com/teefoss/LibDOS/blob/master/screenshots/logo.png)
+LibDOS is some sort of MS-DOS-like terminal, using a partial implementation (only the fun parts) of Turbo C (Copyright (c) 1987, 1988 Borland International, Inc.).
 
-LibDOS is some sort of MS-DOS-like terminal, using a partial implementation of Turbo C (Copyright (c) 1987, 1988 Borland International, Inc.).
-
-**Development in progress.** Currently only available for Linux/Mac.
-
-- See the wiki for documentation (coming soon-ish)
-- See examples/ for examples of exciting things this library can do (also soon-ish)
+**Development in progress.**
 
 ## Who might want to use this library
 
@@ -24,4 +19,5 @@ LibDOS is some sort of MS-DOS-like terminal, using a partial implementation of T
 
 ## Getting Started
 
-See the [wiki](https://github.com/teefoss/LibDOS/wiki)!
+- See the [wiki](https://github.com/teefoss/LibDOS/wiki)!
+- See the examples folder for sample programs.

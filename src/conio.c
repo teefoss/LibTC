@@ -294,6 +294,7 @@ int getmouse()
     if ( mousebuf.count ) {
         return mousebuf.data[--mousebuf.count];
     }
+    
     return 0;
 }
 
