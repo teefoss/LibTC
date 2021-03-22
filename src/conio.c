@@ -35,8 +35,6 @@ static void tab()
 }
 
 
-#pragma mark - PUBLIC
-
 void clreol(void)
 {
     short *cell;

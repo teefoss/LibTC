@@ -45,8 +45,6 @@ text_t text = {
 int base = 1;
 
 
-#pragma mark - PRIVATE
-
 short * dos_cell(int x, int y)
 {
     return text.buf + y * text.info.screenwidth + x;
@@ -387,9 +385,6 @@ fill_input_buffers (void)
 }
 
 
-#pragma mark - PUBLIC
-
-
 void
 initdos (void)
 {
@@ -555,4 +550,17 @@ void savescr(const char *file)
     if ( SDL_SaveBMP(save, file) != 0 ) {
         printf("savescr: could not save bmp!");
     }
+}
+
+
+void randomize(void)
+{
+    seed = (unsigned)time(NULL);
+}
+
+
+unsigned dosrand(unsigned num)
+{
+    seed = (uint64_t)seed * 48271 % 0x7fffffff;
+    return seed % num;
 }
