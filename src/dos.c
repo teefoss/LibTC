@@ -180,7 +180,7 @@ static void rendercursor(void)
     
     switch ( curstype ) {
         case CURSOR_NORMAL:
-            r.h = 2;
+            r.h = text.char_h / 5;
             r.y = ((text.info.cury - base) * text.char_h) + text.char_h - r.h;
             break;
         case CURSOR_SOLID:
