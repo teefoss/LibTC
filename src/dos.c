@@ -15,7 +15,6 @@ static char *           winname;
 static int              scale = 1;
 static unsigned char    bdrcolor = BLACK;
 static int              curstype = CURSOR_NORMAL;
-static unsigned         seed;
 
 static SDL_AudioSpec        spec;
 static SDL_AudioDeviceID    device;
@@ -55,6 +54,15 @@ short * dos_currentcell()
 {
     int x = text.info.curx - base;
     int y = text.info.cury - base;
+    
+    return dos_cell(x, y);
+}
+
+/* translate a cell coord to buffer index */
+short * coord_to_cell(int x, int y)
+{
+    int ix = x - base;
+    int iy = y - base;
     
     return dos_cell(x, y);
 }
@@ -387,9 +395,7 @@ fill_input_buffers (void)
 
 void
 initdos (void)
-{
-    seed = time(NULL);
-    
+{    
     if ( SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0 ) {
         printf("could not init sdl: %s\n", SDL_GetError());
         exit(1);
@@ -555,12 +561,5 @@ void savescr(const char *file)
 
 void randomize(void)
 {
-    seed = (unsigned)time(NULL);
-}
-
-
-unsigned dosrand(unsigned num)
-{
-    seed = (uint64_t)seed * 48271 % 0x7fffffff;
-    return seed % num;
+    srand((unsigned)time(NULL));
 }

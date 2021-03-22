@@ -134,24 +134,40 @@ void gotoxy(int x, int y)
     text.info.cury = y;
 }
 
+
+void highvideo(void)
+{
+    text.info.attribute |= 0x8;
+}
+
+
+void lowvideo(void)
+{
+    text.info.attribute &= ~0x8;
+}
+
+
+void normvideo(void)
+{
+    text.info.attribute = LIGHTGRAY;
+}
+
+
 /* TODO: this is fucked */
 int puttext(int left, int top, int right, int bottom, void *source)
 {
     /* TODO: error handling */
-    int x, y, w, h;
-    short *cell;
-    int i, x1, y1;
-    
-    x = left - base;
-    y = top - base;
-    w = right - left + 1;
-    h = bottom - top + 1;
-    
-    cell = (short *)source;
+    int x, y;
+    short *src_cell, *dst_cell;
+    int i;
+        
+    src_cell = (short *)source;
 
-    for ( y1=y, i=0 ; y1<y+h ; y1++ ) {
-        for ( x1=x ; x1<x+w ; x++ ) {
-            text.buf[y1 * text.info.screenwidth + x1] = cell[i++];
+    for ( y = top, i = 0; y <= bottom; y++ ) {
+        for ( x = left; x <= right; x++ ) {
+            dst_cell = coord_to_cell(x, y);
+            *dst_cell = src_cell[i++];
+            printf("dst set to %x\n", *dst_cell);
         }
     }
     

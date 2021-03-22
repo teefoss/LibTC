@@ -1,6 +1,6 @@
 > Any sufficiently advanced technology is indistinguishable from magic.
 >
-> &mdash <cite>Clark's Third Law</cite>
+> &mdash; <cite>Clark's Third Law</cite>
 
 ![The LibDOS logo. Max cool.](https://github.com/xiphiasnonus/LibDOS/blob/master/screenshots/logo.png)
 

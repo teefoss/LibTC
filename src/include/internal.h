@@ -47,6 +47,7 @@ void    dos_setcga(COLOR c);
 void    dos_drawchar(short cell, int x, int y);
 short * dos_cell(int x, int y); /* text buf cell at x, y */
 short * dos_currentcell(void); /* text buf cell for current cursor */
+short * coord_to_cell(int x, int y);
 int     dos_maxx(); /* text buffer cell x value */
 int     dos_maxy();
 

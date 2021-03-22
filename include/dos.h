@@ -12,7 +12,6 @@ void refresh(void);
 void sleep(unsigned seconds);
 void delay(unsigned milliseconds);
 void randomize(void);
-unsigned dosrand(unsigned num);
 
 void setscale(int newscale);
 void setscreensize(int width, int height);

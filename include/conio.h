@@ -121,16 +121,16 @@ void clreol(void);
 void clrscr(void);
 void delline(void); /* TODO */
 int  gettext(int left, int top, int right, int bottom, void *destin);
-void gettextinfo(TEXT_INFO *r); /* TODO */
+void gettextinfo(TEXT_INFO *r);
 void gotoxy(int x, int y);
-void highvideo(void); /* TODO */
+void highvideo(void);
 void insline(void); /* TODO */
-void lowvideo(void); /* TODO */
+void lowvideo(void);
 int  movetext(int left, int top, int right, int bottom,
               int destleft, int desttop); /* TODO */
-void normvideo(void); /* TODO */
+void normvideo(void);
 int  puttext(int left, int top, int right, int bottom, void *source);/* TODO */
-void textattr(int newattr); /* TODO */
+void textattr(int newattr);
 void textbackground(int newcolor);
 void textcolor(int newcolor);
 void textmode(int newmode);

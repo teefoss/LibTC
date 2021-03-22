@@ -14,8 +14,8 @@ font.o: src/font.c
 	cc -c $^ -o $@ $(CFLAGS)
 
 install: $(TARGET)
-	cp $(TARGET) /usr/local/lib
-	cp include/* /usr/local/include
+	cp -i $(TARGET) /usr/local/lib
+	cp -i include/* /usr/local/include
 
 .PHONY: clean
 clean:
