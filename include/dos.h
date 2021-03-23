@@ -5,23 +5,21 @@
 #define CURSOR_NORMAL   1
 #define CURSOR_SOLID    2
 
+void delay(unsigned milliseconds);
+int  getbordercolor(void);
 void initdos(void);
 void quitdos(void);
-
-void refresh(void);
-void sleep(unsigned seconds);
-void delay(unsigned milliseconds);
 void randomize(void);
-
-void setscale(int newscale);
-void setscreensize(int width, int height);
+void refresh(void);
+void setbordercolor(int color);
 void setbordersize(int newsize);
 void setcursor(int type);
 void setname(const char * newname);
-void bordercolor(int newcolor);
-
+void setscale(int newscale);
+void setscreensize(int width, int height);
+void sleep(unsigned seconds);
 void sound(unsigned frequency, unsigned milliseconds);
 
-void savescr(const char *file);
+void savescr(const char *file); /* FIXME */
 
 #endif /* dos_h_ */

@@ -535,9 +535,15 @@ void setname(const char * newname)
 }
 
 
-void bordercolor(int newcolor)
+void setbordercolor(int color)
 {
-    bdrcolor = (unsigned char)newcolor;
+    bdrcolor = (unsigned char)color;
+}
+
+
+int getbordercolor()
+{
+    return bdrcolor;
 }
 
 

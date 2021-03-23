@@ -3,6 +3,8 @@
 
 int bkcolor;
 int drawcolor = WHITE;
+static int cpx;
+static int cpy;
 
 void circle(int x, int y, int radius)
 {
@@ -43,6 +45,8 @@ void circle(int x, int y, int radius)
 void cleardevice(void)
 {
     clrscr();
+    cpx = 0;
+    cpy = 0;
     dos_setcga(bkcolor);
     SDL_RenderClear(renderer);
 }
@@ -89,6 +93,28 @@ int getbkcolor(void)
 int getcolor(void)
 {
     return drawcolor;
+}
+
+
+void getimage(int left, int top, int right, int bottom, void *bitmap)
+{
+    int x, y;
+    int w, h;
+    
+    w = right - left + 1;
+    h = bottom - top + 1;
+    
+    *(short *)bitmap = w;
+    bitmap = (short *)bitmap + 1;
+    *(short *)bitmap = h;
+    bitmap = (short *)bitmap + 1;
+    
+    for ( y = top; y <= bottom; y++ ) {
+        for ( x = left; x <= right; x++ ) {
+            *(char *)bitmap = getpixel(x, y);
+            bitmap = (char *)bitmap + 1;
+        }
+    }
 }
 
 
@@ -147,10 +173,112 @@ unsigned getpixel(int x, int y)
 }
 
 
+unsigned imagesize(int left, int top, int right, int bottom)
+{
+    int w, h;
+    
+    w = right - left + 1;
+    h = bottom - top + 1;
+    
+    return w * h + 4;
+}
+
+
+void line(int x1, int y1, int x2, int y2)
+{
+    dos_setcga(drawcolor);
+    SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
+}
+
+
+void linerel(int dx, int dy)
+{
+    line(cpx, cpy, cpx + dx, cpy + dy);
+    moverel(dx, dy);
+}
+
+
+void lineto(int x, int y)
+{
+    line(cpx, cpy, x, y);
+    moveto(x, y);
+}
+
+
+void moverel(int dx, int dy)
+{
+    cpx += dx;
+    cpy += dy;
+}
+
+
+void moveto(int x, int y)
+{
+    cpx = x;
+    cpy = y;
+}
+
+
+void putimage(int left, int top, void *bitmap, int op)
+{
+    short w, h;
+    short *p16;
+    char *p8;
+    int x, y;
+    
+    p16 = (short *)bitmap;
+    w = *p16++;
+    h = *p16++;
+    p8 = (char *)p16;
+    
+    for ( y = top; y < top + h; y++ ) {
+        for ( x = left; x < left + w; x++ ) {
+            int current = getpixel(x, y);
+            int new;
+            
+            switch ( op ) { /* check if this is right */
+                default:
+                case COPY_PUT:
+                    new = *p8;
+                    break;
+                case XOR_PUT:
+                    new = *p8 ^ current;
+                    break;
+                case OR_PUT:
+                    new = *p8 | current;
+                    break;
+                case AND_PUT:
+                    new = *p8 & current;
+                    break;
+                case NOT_PUT:
+                    new = !*p8;
+                    break;
+            }
+            putpixel(x, y, new);
+            p8++;
+        }
+    }
+}
+
+
 void putpixel(int x, int y, int color)
 {
     dos_setcga(color);
     SDL_RenderDrawPoint(renderer, x, y);
+}
+
+
+void rectangle(int left, int top, int right, int bottom)
+{
+    SDL_Rect r;
+    
+    r.x = left;
+    r.y = top;
+    r.w = right - left + 1;
+    r.h = bottom - top + 1;
+    
+    dos_setcga(drawcolor);
+    SDL_RenderDrawRect(renderer, &r);
 }
 
 

@@ -52,14 +52,14 @@ int  getx(void);
 int  gety(void);
 void graphdefaults(void); /* TODO */
 unsigned imagesize(int left, int top, int right, int bottom); /* TODO */
-void line(int x1, int y1, int x2, int y2); /* TODO */
-void linerel(int dx, int dy); /* TODO */
-void lineto(int x, int y); /* TODO */
-void moverel(int dx, int dy); /* TODO */
-void moveto(int x, int y); /* TODO */
+void line(int x1, int y1, int x2, int y2);
+void linerel(int dx, int dy);
+void lineto(int x, int y);
+void moverel(int dx, int dy);
+void moveto(int x, int y);
 void putimage(int left, int top, void *bitmap, int op); /* TODO */
 void putpixel(int x, int y, int color);
-void rectangle(int left, int top, int right, int bottom); /* TODO */
+void rectangle(int left, int top, int right, int bottom);
 void setbkcolor(int color);
 void setcolor(int color);
 void setviewport(int left, int top, int right, int bottom, int clip); /* TODO */
