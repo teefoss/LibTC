@@ -1,8 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 #include <stdbool.h>
-
+#include <stdlib.h>
 #include <dos.h>
 #include <conio.h>
 #include <graphics.h>
@@ -11,7 +8,6 @@
 #define CELLTYPES   3
 
 int board[BOARDSIZE][BOARDSIZE];
-
 
 void drawcell(int type, int x, int y)
 {
@@ -69,14 +65,18 @@ void clickcell(int x, int y)
 void randboard()
 {
     setname("Randomizing...");
-    for ( int y=0 ; y<BOARDSIZE ; y++ )
-    for ( int x=0 ; x<BOARDSIZE ; x++ ) {
-        int times = (rand() % 10) + 1;
-        while ( times-- ) {
-            clickcell(x+1, y+1);
-            sound((rand() % 1000) + 800, 25);
-            drawboard();
-            refresh();
+    
+    for ( int y=0 ; y<BOARDSIZE ; y++ ) {
+        for ( int x=0 ; x<BOARDSIZE ; x++ ) {
+            
+            int times = (rand() % 10) + 1;
+            
+            while ( times-- ) {
+                clickcell(x + 1, y + 1);
+                sound((rand() % 1000) + 800, 25);
+                drawboard();
+                refresh();
+            }
         }
     }
     
@@ -89,30 +89,38 @@ bool checkforwin()
     int type = board[0][0];
     
     for ( int y=0 ; y<BOARDSIZE ; y++ )
-    for ( int x=0 ; x<BOARDSIZE ; x++ ) {
-        if ( board[y][x] != type )
-            return false;
-    }
+        for ( int x=0 ; x<BOARDSIZE ; x++ )
+            if ( board[y][x] != type )
+                return false;
     
     return true;
 }
 
 
-void win()
+void fanfare()
 {
-    setname("You win!");
-    delay(500);
     sound(220, 200);
     sound(330, 200);
     sound(440, 200);
     sound(550, 200);
     sound(660, 200);
     sound(880, 200);
+    
     for ( int i=0 ; i<15 ; i++ ) {
         sound(i % 2 ? 977 : 880, 75);
     }
-    setname("Congratulations!");
+}
+
+void win()
+{
+    setname("You win!");
+    delay(500);
+    
+    fanfare();
+    
+    setname("Congrats!");
     sleep(2);
+    
     randboard();
 }
 
@@ -138,7 +146,9 @@ void mouseinput()
 
 
 int main()
-{    
+{
+    randomize();
+    
     textmode(C40);
     setscreensize(BOARDSIZE, BOARDSIZE);
     setscale(10);
