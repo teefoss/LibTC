@@ -1,6 +1,7 @@
 #include "conio.h"
 #include "internal.h"
 
+#include <string.h>
 #include <stdarg.h>
 
 #define CLAMP(x,low,high)  (((x)>(high))?(high):(((x)<(low))?(low):(x)))
@@ -70,9 +71,33 @@ void clrscr()
 }
 
 
+/* fucked as well */
 void delline()
 {
+    short * row;
+    int num_rows; /* to move */
+    int i, w;
     
+    /* beginning of current line */
+    row = dos_cell(0, text.info.cury - base);
+    
+    num_rows = text.info.screenheight - text.info.cury;
+    
+    w = text.info.screenwidth;
+    
+    /* move all following rows up by one */
+    for ( i = 0; i < num_rows; i++ ) {
+        void *src = row + w;
+        printf("moving %p to %p\n", src, (void *)row);
+        memcpy(row, row + w, sizeof(short) * w);
+        row += w;
+    }
+    
+    /* clear the last line */
+#if 0
+    row = dos_cell(0, text.info.screenheight - 1);
+    memset(row, 0, sizeof(short) * w);
+#endif
 }
 
 
