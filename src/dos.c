@@ -46,7 +46,7 @@ int base = 1;
 
 short * dos_cell(int x, int y)
 {
-    return text.buf + y * text.info.screenwidth + x;
+    return text.buf + (y * text.info.screenwidth + x);
 }
 
 
@@ -248,6 +248,24 @@ void dos_drawchar(short cell, int x, int y)
                                 y * text.char_h + cy);
         }
         data++;
+    }
+}
+
+
+/* x, y: text coordinates */
+void refresh_region(int x, int y, int w, int h)
+{
+    short * cell;
+    int     ix, iy; /* text buffer indices */
+    int     x1, y1;
+    
+    for ( y1 = y; y1 < y + h; y1++ ) {
+        for ( x1 = x; x1 < x + w; x1++ ) {
+            ix = x1 - base;
+            iy = y1 - base;
+            cell = dos_cell(ix, iy);
+            dos_drawchar(*cell, ix, iy);
+        }
     }
 }
 

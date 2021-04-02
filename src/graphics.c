@@ -1,11 +1,12 @@
 #include "graphics.h"
 #include "internal.h"
 
-int bkcolor;
-int drawcolor = WHITE;
-static int cpx;
-static int cpy;
+int         bkcolor; /* background color */
+int         drawcolor = WHITE; /* current color for drawing operations*/
+static int  cpx, cpy; /* current drawing point, c.f moveto() */
+VIEWPORT    vp; /* current viewport */
 
+/* look up where I got this... */
 void circle(int x, int y, int radius)
 {
     int f = 1 - radius;
@@ -14,12 +15,10 @@ void circle(int x, int y, int radius)
     int x1 = 0;
     int y1 = radius;
  
-    dos_setcga(drawcolor);
-    
-    SDL_RenderDrawPoint(renderer, x, y + radius);
-    SDL_RenderDrawPoint(renderer, x, y - radius);
-    SDL_RenderDrawPoint(renderer, x + radius, y);
-    SDL_RenderDrawPoint(renderer, x - radius, y);
+    putpixel(x, y + radius, drawcolor);
+    putpixel(x, y - radius, drawcolor);
+    putpixel(x + radius, y, drawcolor);
+    putpixel(x - radius, y, drawcolor);
  
     while ( x1 < y1 ) {
         if ( f >= 0 ) {
@@ -30,20 +29,21 @@ void circle(int x, int y, int radius)
         x1++;
         ddF_x += 2;
         f += ddF_x + 1;
-        SDL_RenderDrawPoint(renderer, x + x1, y + y1);
-        SDL_RenderDrawPoint(renderer, x - x1, y + y1);
-        SDL_RenderDrawPoint(renderer, x + x1, y - y1);
-        SDL_RenderDrawPoint(renderer, x - x1, y - y1);
-        SDL_RenderDrawPoint(renderer, x + y1, y + x1);
-        SDL_RenderDrawPoint(renderer, x - y1, y + x1);
-        SDL_RenderDrawPoint(renderer, x + y1, y - x1);
-        SDL_RenderDrawPoint(renderer, x - y1, y - x1);
+        putpixel(x + x1, y + y1, drawcolor);
+        putpixel(x - x1, y + y1, drawcolor);
+        putpixel(x + x1, y - y1, drawcolor);
+        putpixel(x - x1, y - y1, drawcolor);
+        putpixel(x + y1, y + x1, drawcolor);
+        putpixel(x - y1, y + x1, drawcolor);
+        putpixel(x + y1, y - x1, drawcolor);
+        putpixel(x - y1, y - x1, drawcolor);
     }
 }
 
 
 void cleardevice(void)
 {
+    /* reset viewport? */
     clrscr();
     cpx = 0;
     cpy = 0;
@@ -52,21 +52,40 @@ void cleardevice(void)
 }
 
 
+void resetviewport(void)
+{
+    vp.left   = 0;
+    vp.top    = 0;
+    vp.bottom = getmaxy();
+    vp.right  = getmaxx();
+    vp.clip   = 1;
+}
+
+
+void clearviewport(void)
+{
+}
+
+
 static void floodfill_r(int x, int y, int color, int replace)
 {
     int p;
+    int vpr, vpb; /* viewport left and bottom */
+    
     if ( replace == color )
         return;
     
-    if ( x < 0 || x >= getmaxx() || y < 0 || y >= getmaxy() )
+    vpr = vp.right - vp.left;
+    vpb = vp.bottom - vp.top;
+    
+    if ( x < 0 || x > vpr || y < 0 || y > vpb )
         return;
     
     p = getpixel(x, y);
     if ( p != replace )
         return;
 
-    dos_setcga(color);
-    SDL_RenderDrawPoint(renderer, x, y);
+    putpixel(x, y, color);
     
     floodfill_r(x + 0, y + 1, color, replace);
     floodfill_r(x + 0, y - 1, color, replace);
@@ -118,7 +137,6 @@ void getimage(int left, int top, int right, int bottom, void *bitmap)
 }
 
 
-
 int  getmaxx(void)
 {
     return text.info.screenwidth * text.char_w - 1;
@@ -141,8 +159,11 @@ unsigned getpixel(int x, int y)
     int         irgb;
     int         i;
     
-    rect.x = x;
-    rect.y = y;
+    rect.x = x + vp.left;
+    rect.y = y + vp.top;
+    
+    /* check coords bounds */
+    
     rect.w = rect.h = 1;
     
     pitch = (getmaxx() + 1) * 4;
@@ -173,13 +194,19 @@ unsigned getpixel(int x, int y)
 }
 
 
+void getviewsettings(struct viewport *viewport)
+{
+    *viewport = vp;
+}
+
+
 unsigned imagesize(int left, int top, int right, int bottom)
 {
     int w, h;
     
     w = right - left + 1;
     h = bottom - top + 1;
-    
+        
     return w * h + 4;
 }
 
@@ -187,20 +214,26 @@ unsigned imagesize(int left, int top, int right, int bottom)
 void line(int x1, int y1, int x2, int y2)
 {
     dos_setcga(drawcolor);
-    SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
+    SDL_RenderDrawLine(renderer,
+                       x1 + vp.left,
+                       y1 + vp.top,
+                       x2 + vp.left,
+                       y2 + vp.top);
 }
 
 
 void linerel(int dx, int dy)
 {
-    line(cpx, cpy, cpx + dx, cpy + dy);
+    dos_setcga(drawcolor);
+    SDL_RenderDrawLine(renderer, cpx, cpy, cpx + dx, cpy + dy);
     moverel(dx, dy);
 }
 
 
 void lineto(int x, int y)
 {
-    line(cpx, cpy, x, y);
+    dos_setcga(drawcolor);
+    SDL_RenderDrawLine(renderer, cpx, cpy, x + vp.left, y + vp.top);
     moveto(x, y);
 }
 
@@ -214,8 +247,8 @@ void moverel(int dx, int dy)
 
 void moveto(int x, int y)
 {
-    cpx = x;
-    cpy = y;
+    cpx = x + vp.left;
+    cpy = y + vp.top;
 }
 
 
@@ -251,7 +284,7 @@ void putimage(int left, int top, void *bitmap, int op)
                     new = *p8 & current;
                     break;
                 case NOT_PUT:
-                    new = !*p8;
+                    new = ~(*p8);
                     break;
             }
             putpixel(x, y, new);
@@ -263,22 +296,26 @@ void putimage(int left, int top, void *bitmap, int op)
 
 void putpixel(int x, int y, int color)
 {
+    if ( (x < vp.left || x > vp.right) && vp.clip )
+        return;
+    
+    if ( (y < vp.top || y > vp.bottom) && vp.clip )
+        return;
+
     dos_setcga(color);
-    SDL_RenderDrawPoint(renderer, x, y);
+    SDL_RenderDrawPoint(renderer, x + vp.left, y + vp.top);
 }
 
 
 void rectangle(int left, int top, int right, int bottom)
 {
-    SDL_Rect r;
+    int x, y;
     
-    r.x = left;
-    r.y = top;
-    r.w = right - left + 1;
-    r.h = bottom - top + 1;
-    
-    dos_setcga(drawcolor);
-    SDL_RenderDrawRect(renderer, &r);
+    for ( y = top; y <= bottom; y++ ) {
+        for ( x = left; x <= right; x++ ) {
+            putpixel(x, y, drawcolor);
+        }
+    }
 }
 
 

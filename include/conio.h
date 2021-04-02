@@ -141,9 +141,8 @@ void window(int left, int top, int right, int bottom); /* TODO */
 char *cgets(char *str); /* TODO */
 int  cprintf(const char *format, ...);
 int  cputs(const char *str);
-int  cscanf(const char *format, ...); /* TODO */
 int  getch(void);
-int  getche(void); /* TODO */
+int  getche(void); /* TODO: check original implementation */
 int  kbhit(void);
 int  putch(int c);
 int  ungetch(int ch); /* TODO */
@@ -155,5 +154,6 @@ int  mousex(void);
 int  mousey(void);
 int  getmouse(void);
 void setbase(int index);
+short *textbuffer(void);
 
 #endif /* conio_h_*/

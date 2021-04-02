@@ -9,6 +9,25 @@
 queue_t keybuf;
 queue_t mousebuf;
 
+/* move entire line at y = 'from' to y = 'to' */
+static void move_line(int from, int to)
+{
+    short   *dst, *src;
+    int     x;
+    
+    src = dos_cell(0, from - base);
+    dst = dos_cell(0, to - base);
+    
+    for ( x = 0; x < text.info.screenwidth; x++ ) {
+        *dst++ = *src++;
+        
+    }
+    
+    refresh_region(base, from,  text.info.screenwidth, 1);
+    refresh_region(base, to,    text.info.screenwidth, 1);
+}
+
+
 static void newline()
 {
     text.info.curx = base;
@@ -29,7 +48,7 @@ static void advancecursor(int amount)
 }
 
 
-static void tab()
+static void tab() /* TODO: tab size? */
 {
     while ( text.info.curx % 4 != 0 )
         advancecursor(1);
@@ -71,33 +90,26 @@ void clrscr()
 }
 
 
-/* fucked as well */
 void delline()
 {
-    short * row;
-    int num_rows; /* to move */
-    int i, w;
-    
-    /* beginning of current line */
-    row = dos_cell(0, text.info.cury - base);
-    
-    num_rows = text.info.screenheight - text.info.cury;
-    
-    w = text.info.screenwidth;
+    short *     cell;
+    int         max_row;
+    int         x, y;
     
     /* move all following rows up by one */
-    for ( i = 0; i < num_rows; i++ ) {
-        void *src = row + w;
-        printf("moving %p to %p\n", src, (void *)row);
-        memcpy(row, row + w, sizeof(short) * w);
-        row += w;
+    max_row = dos_maxy();
+    for ( y = text.info.cury; y < max_row; y++ ) {
+        move_line(y + 1, y);
     }
     
     /* clear the last line */
-#if 0
-    row = dos_cell(0, text.info.screenheight - 1);
-    memset(row, 0, sizeof(short) * w);
-#endif
+    y = text.info.screenheight - 1;
+    cell = dos_cell(0, y);
+    for ( x = 0; x < text.info.screenwidth; x++ ) {
+        *cell = text.info.attribute << 8;
+        dos_drawchar(*cell, x, y);
+        cell++;
+    }
 }
 
 
@@ -178,7 +190,7 @@ void normvideo(void)
 }
 
 
-/* TODO: this is fucked */
+/* FIXME: this is fucked */
 int puttext(int left, int top, int right, int bottom, void *source)
 {
     /* TODO: error handling */
@@ -192,7 +204,6 @@ int puttext(int left, int top, int right, int bottom, void *source)
         for ( x = left; x <= right; x++ ) {
             dst_cell = coord_to_cell(x, y);
             *dst_cell = src_cell[i++];
-            printf("dst set to %x\n", *dst_cell);
         }
     }
     
@@ -310,8 +321,20 @@ int getch()
     if ( keybuf.count ) {
         return keybuf.data[--keybuf.count];
     }
-    return 0;
+    
+    return EOF;
 }
+
+
+int getche(void)
+{
+    if ( keybuf.count ) {
+        return putch(keybuf.data[--keybuf.count]);
+    }
+    
+    return EOF;
+}
+
 
 
 int getmouse()
@@ -323,6 +346,8 @@ int getmouse()
     return 0;
 }
 
+
+/* char *cgets(char *str) { } */
 
 
 int cprintf(const char *format, ...)
@@ -368,12 +393,6 @@ int cputs(const char *str)
 }
 
 
-int  getche(void)
-{
-    return 0;
-}
-
-
 int putch(int c)
 {
     short * cell;
@@ -405,3 +424,8 @@ void setbase(int index)
     base = index;
 }
 
+
+short *textbuffer()
+{
+    return text.buf;
+}

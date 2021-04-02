@@ -40,11 +40,13 @@ extern text_t   text;
 extern uchar    bordersize;
 extern int      base;
 extern int      bkcolor;
+/*extern VIEWPORT vp;*/
 
 int     dos_clamp(int x, int min, int max);
 int     dos_scale(void);
 void    dos_setcga(COLOR c);
 void    dos_drawchar(short cell, int x, int y);
+void    refresh_region(int x, int y, int w, int h);
 short * dos_cell(int x, int y); /* text buf cell at x, y */
 short * dos_currentcell(void); /* text buf cell for current cursor */
 short * coord_to_cell(int x, int y);

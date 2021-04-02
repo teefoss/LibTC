@@ -32,10 +32,10 @@ enum putimage_ops { /* BitBlt operators for putimage */
     NOT_PUT
 };
 
-struct viewporttype {
+typedef struct viewport {
     int left, top, right, bottom;
     int clip;
-};
+} VIEWPORT;
 
 void circle(int x, int y, int radius);
 void cleardevice(void);
@@ -43,21 +43,21 @@ void clearviewport(void); /* TODO */
 void floodfill(int x, int y, int color);
 int  getbkcolor(void);
 int  getcolor(void);
-void getimage(int left, int top, int right, int bottom, void *bitmap); /* TODO */
+void getimage(int left, int top, int right, int bottom, void *bitmap);
 int  getmaxx(void);
 int  getmaxy(void);
 unsigned getpixel(int x, int y);
-void getviewsettings(struct viewporttype *viewport); /* TODO */
+void getviewsettings(struct viewport *viewport); /* TODO */
 int  getx(void);
 int  gety(void);
 void graphdefaults(void); /* TODO */
-unsigned imagesize(int left, int top, int right, int bottom); /* TODO */
+unsigned imagesize(int left, int top, int right, int bottom);
 void line(int x1, int y1, int x2, int y2);
 void linerel(int dx, int dy);
 void lineto(int x, int y);
 void moverel(int dx, int dy);
 void moveto(int x, int y);
-void putimage(int left, int top, void *bitmap, int op); /* TODO */
+void putimage(int left, int top, void *bitmap, int op);
 void putpixel(int x, int y, int color);
 void rectangle(int left, int top, int right, int bottom);
 void setbkcolor(int color);
