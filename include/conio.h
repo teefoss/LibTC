@@ -129,7 +129,7 @@ void lowvideo(void);
 int  movetext(int left, int top, int right, int bottom,
               int destleft, int desttop); /* TODO */
 void normvideo(void);
-int  puttext(int left, int top, int right, int bottom, void *source);/* TODO */
+int  puttext(int left, int top, int right, int bottom, void *source);
 void textattr(int newattr);
 void textbackground(int newcolor);
 void textcolor(int newcolor);

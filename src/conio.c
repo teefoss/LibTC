@@ -113,22 +113,33 @@ void delline()
 }
 
 
+/* check gettext and puttext coords */
+static int bad_coords(int left, int top, int right, int bottom)
+{
+    if (left < base
+        || top < base
+        || right > dos_maxx()
+        || bottom > dos_maxy()) {
+        return 1;
+    }
+    
+    if ( left > right || top > bottom ) {
+        return 1;
+    }
+    
+    return 0;
+}
+
+
 int gettext(int left, int top, int right, int bottom, void *destin)
 {
     void *check;
     short *cell;
-    int x, y;
+    int x, y; /* buffer indices */
     int w, h;
     int i;
     
-    if (left < base
-        || top < base
-        || right > dos_maxx()
-        || bottom >= dos_maxy()) {
-        return 0;
-    }
-    
-    if ( left > right || top > bottom ) {
+    if ( bad_coords(left, top, right, bottom) ) {
         return 0;
     }
     
@@ -139,9 +150,7 @@ int gettext(int left, int top, int right, int bottom, void *destin)
     cell = dos_cell(x, y);
     
     for ( i = 0; i < h; i++ ) {
-        check = memcpy(destin, (void *)cell, w * sizeof(short));
-        
-        if ( check != destin ) {
+        if ( memcpy(destin, (void *)cell, w * sizeof(short)) != destin ) {
             return 0;
         }
         
@@ -190,24 +199,35 @@ void normvideo(void)
 }
 
 
-/* FIXME: this is fucked */
 int puttext(int left, int top, int right, int bottom, void *source)
 {
-    /* TODO: error handling */
-    int x, y;
+    int x, y, r, b; /* buffer indices */
+    int x1, y1;
     short *src_cell, *dst_cell;
     int i;
-        
-    src_cell = (short *)source;
-
-    for ( y = top, i = 0; y <= bottom; y++ ) {
-        for ( x = left; x <= right; x++ ) {
-            dst_cell = coord_to_cell(x, y);
-            *dst_cell = src_cell[i++];
-        }
+    int result;
+    
+    if ( bad_coords(left, top, right, bottom) ) {
+        return 0;
     }
     
-    return 1;
+    src_cell = (short *)source;
+    x = left - base;
+    y = top - base;
+    r = right - base;
+    b = bottom - base;
+
+    result = 0;
+    for ( y1 = y; y1 <= b; y1++ ) {
+        for ( x1 = x; x1 <= r; x1++ ) {
+            dst_cell = dos_cell(x1, y1);
+            *dst_cell = *src_cell++;
+            dos_drawchar(*dst_cell, x1, y1);
+            result++;
+        }
+    }
+        
+    return result;
 }
 
 
