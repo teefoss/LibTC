@@ -4,6 +4,7 @@
 
 #include <stdbool.h>
 #include <time.h>
+#include <ctype.h>
 
 #define TEXTblink_INTERVAL     250
 #define CURSORblink_INTERVAL   150
@@ -367,6 +368,7 @@ static void
 fill_input_buffers (void)
 {
     SDL_Event event;
+    int sym;
 
     keybuf.count = 0;
     mousebuf.count = 0;
@@ -384,20 +386,72 @@ fill_input_buffers (void)
             case SDL_KEYDOWN:
                 switch ( event.key.keysym.sym ) {
                     case SDLK_RSHIFT:
+                        modifiers |= MOD_RSHIFT;
+                        break;
                     case SDLK_LSHIFT:
+                        modifiers |= MOD_LSHIFT;
+                        break;
                     case SDLK_RCTRL:
+                        modifiers |= MOD_RCTRL;
+                        break;
                     case SDLK_LCTRL:
+                        modifiers |= MOD_LCTRL;
+                        break;
                     case SDLK_RALT:
+                        modifiers |= MOD_RALT;
+                        break;
                     case SDLK_LALT:
+                        modifiers |= MOD_LALT;
+                        break;
                     case SDLK_RGUI:
+                        modifiers |= MOD_RGUI;
+                        break;
                     case SDLK_LGUI:
+                        modifiers |= MOD_LGUI;
+                        break;
                     case SDLK_NUMLOCKCLEAR:
                     case SDLK_CAPSLOCK:
                         return;
-                    case SDLK_UP:
-                        printf("up: %d\n", event.key.keysym.sym);
+                    default: /* TODO: backspace, return */
+                        sym = event.key.keysym.sym;
+                        
+                        if ( (modifiers & MOD_SHIFT) && islower(sym) ) {
+                            keybuf.data[keybuf.count] = sym - 32;
+                        } else {
+                            keybuf.data[keybuf.count] = sym;
+                        }
+                        
+                        keybuf.count++;
+                        break;
+                }
+                break;
+            case SDL_KEYUP:
+                switch ( event.key.keysym.sym ) {
+                    case SDLK_RSHIFT:
+                        modifiers &= ~MOD_RSHIFT;
+                        break;
+                    case SDLK_LSHIFT:
+                        modifiers &= ~MOD_LSHIFT;
+                        break;
+                    case SDLK_RCTRL:
+                        modifiers &= ~MOD_RCTRL;
+                        break;
+                    case SDLK_LCTRL:
+                        modifiers &= ~MOD_LCTRL;
+                        break;
+                    case SDLK_RALT:
+                        modifiers &= ~MOD_RALT;
+                        break;
+                    case SDLK_LALT:
+                        modifiers &= ~MOD_LALT;
+                        break;
+                    case SDLK_RGUI:
+                        modifiers &= ~MOD_RGUI;
+                        break;
+                    case SDLK_LGUI:
+                        modifiers &= ~MOD_LGUI;
+                        break;
                     default:
-                        keybuf.data[keybuf.count++] = event.key.keysym.sym;
                         break;
                 }
                 break;

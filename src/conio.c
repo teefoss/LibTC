@@ -8,6 +8,7 @@
 
 queue_t keybuf;
 queue_t mousebuf;
+int     modifiers;
 
 /* move entire line at y = 'from' to y = 'to' */
 static void move_line(int from, int to)
@@ -184,6 +185,28 @@ void gotoxy(int x, int y)
 void highvideo(void)
 {
     text.info.attribute |= 0x8;
+}
+
+
+void insline(void)
+{
+    int x, y;
+    short * cell;
+    
+    for ( y = dos_maxy() - 1; y >= text.info.cury; --y ) {
+        move_line(y, y + 1);
+    }
+    
+    /* delete current line */
+    
+    y = text.info.cury - base;
+    cell = dos_cell(0, y);
+    
+    for ( x = 0; x < text.info.screenwidth; x++ ) {
+        *cell &= 0xFF00;
+        dos_drawchar(*cell, x, y);
+        cell++;
+    }
 }
 
 
@@ -455,10 +478,13 @@ int putch(int c)
 }
 
 
-int  ungetch(int ch)
+int ungetch(int ch)
 {
-    (void)ch;
-    return 0;
+    if ( keybuf.count + 1 < QUEUE_SIZE ) {
+        return (keybuf.data[keybuf.count++] = ch);
+    }
+    
+    return EOF;
 }
 
 

@@ -124,7 +124,7 @@ int  gettext(int left, int top, int right, int bottom, void *destin);
 void gettextinfo(TEXT_INFO *r);
 void gotoxy(int x, int y);
 void highvideo(void);
-void insline(void); /* TODO */
+void insline(void);
 void lowvideo(void);
 int  movetext(int left, int top, int right, int bottom,
               int destleft, int desttop);
@@ -145,7 +145,7 @@ int  getch(void);
 int  getche(void); /* TODO: check original implementation */
 int  kbhit(void);
 int  putch(int c);
-int  ungetch(int ch); /* TODO */
+int  ungetch(int ch);
 
 /* LibDOS functions */
 
