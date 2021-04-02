@@ -119,7 +119,7 @@ typedef enum colors {
 
 void clreol(void);
 void clrscr(void);
-void delline(void); /* TODO */
+void delline(void);
 int  gettext(int left, int top, int right, int bottom, void *destin);
 void gettextinfo(TEXT_INFO *r);
 void gotoxy(int x, int y);
@@ -127,7 +127,7 @@ void highvideo(void);
 void insline(void); /* TODO */
 void lowvideo(void);
 int  movetext(int left, int top, int right, int bottom,
-              int destleft, int desttop); /* TODO */
+              int destleft, int desttop);
 void normvideo(void);
 int  puttext(int left, int top, int right, int bottom, void *source);
 void textattr(int newattr);

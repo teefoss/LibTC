@@ -193,6 +193,29 @@ void lowvideo(void)
 }
 
 
+int
+movetext(int left, int top, int right, int bottom, int destleft, int desttop)
+{
+    int w, h;
+    short *buf;
+    int result;
+    
+    w = right - left + 1;
+    h = bottom - top + 1;
+    
+    buf = malloc(sizeof(*buf) * w * h);
+    
+    result = gettext(left, top, right, bottom, buf);
+    if ( result == 0 ) {
+        return 0;
+    }
+    
+    result = puttext(destleft, desttop, destleft + w - 1, desttop + h - 1, buf);
+    
+    return result;
+}
+
+
 void normvideo(void)
 {
     text.info.attribute = LIGHTGRAY;
