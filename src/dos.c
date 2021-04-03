@@ -235,7 +235,7 @@ void dos_drawchar(short cell, int x, int y)
     } else { /* 80 */
         fontdata = fontdata80;
         start = 0;
-        stop = text.char_h;
+        stop = text.char_w;
         step = 1;
     }
     
@@ -381,7 +381,7 @@ fill_input_buffers (void)
         
         switch ( event.type ) {
             case SDL_QUIT:
-                quitdos();
+                exit(0);
                 break;
             case SDL_KEYDOWN:
                 switch ( event.key.keysym.sym ) {
@@ -480,6 +480,8 @@ initdos (void)
     initsound();
     
     refresh(); /* make sure the window appears */
+    
+    atexit(quitdos);
 }
 
 
@@ -500,8 +502,6 @@ quitdos (void)
     
     SDL_CloseAudio();
     SDL_Quit();
-    
-    exit(0);
 }
 
 void

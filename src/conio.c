@@ -33,7 +33,7 @@ static void newline()
 {
     text.info.curx = base;
     
-    if ( text.info.cury < text.info.screenheight - 1 + base ) {
+    if ( text.info.cury < dos_maxy() ) {
         text.info.cury++;
     }
 }
@@ -43,7 +43,7 @@ static void advancecursor(int amount)
 {
     text.info.curx += amount;
     
-    if ( text.info.curx > text.info.screenwidth - 1 + base ) {
+    if ( text.info.curx > dos_maxx() ) {
         newline();
     }
 }
