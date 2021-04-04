@@ -1,3 +1,4 @@
+#include "dos.h"
 #include "conio.h"
 #include "internal.h"
 
@@ -331,6 +332,19 @@ int  wherey(void)
     return text.info.cury;
 }
 
+/* TODO: should have done this first! */
+void window(int left, int top, int right, int bottom)
+{
+    if ( bad_coords(left, top, right, bottom) ) {
+        return;
+    }
+    
+    text.info.winleft   = left;
+    text.info.wintop    = top;
+    text.info.winright  = right;
+    text.info.winbottom = bottom;
+}
+
 
 int mousex(void)
 {
@@ -358,15 +372,6 @@ int mousey(void)
     y = dos_clamp(y, 0, maxy);
     
     return y;
-}
-
-
-void window(int left, int top, int right, int bottom)
-{
-    text.info.winleft = left;
-    text.info.wintop = top;
-    text.info.winright = right;
-    text.info.winbottom = bottom;
 }
 
 
@@ -413,7 +418,25 @@ int getmouse()
 }
 
 
-/* char *cgets(char *str) { } */
+char *cgets(char *str)
+{
+    int key = 0;
+    int c = 0;
+    
+    while ( 1 ) {
+        if ( kbhit() ) {
+            key = getch();
+            if ( key == '\r' ) {
+                str[c] = '\0';
+                return str;
+            }
+            putch(key);
+            str[c++] = key;
+        }
+            
+        refresh();
+    }
+}
 
 
 int cprintf(const char *format, ...)

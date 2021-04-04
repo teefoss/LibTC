@@ -138,7 +138,7 @@ int  wherex(void);
 int  wherey(void);
 void window(int left, int top, int right, int bottom); /* TODO */
 
-char *cgets(char *str); /* TODO */
+char *cgets(char *str);
 int  cprintf(const char *format, ...);
 int  cputs(const char *str);
 int  getch(void);
