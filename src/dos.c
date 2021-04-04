@@ -16,6 +16,7 @@ static char *           winname;
 static int              scale = 1;
 static unsigned char    bdrcolor = BLACK;
 static int              curstype = CURSOR_NORMAL;
+static int              modifiers;
 
 static SDL_AudioSpec        spec;
 static SDL_AudioDeviceID    device;
@@ -372,6 +373,7 @@ fill_input_buffers (void)
 
     keybuf.count = 0;
     mousebuf.count = 0;
+    modifiers = SDL_GetModState();
     
     while ( SDL_PollEvent(&event) ) {
         
@@ -384,76 +386,7 @@ fill_input_buffers (void)
                 exit(0);
                 break;
             case SDL_KEYDOWN:
-                switch ( event.key.keysym.sym ) {
-                    case SDLK_RSHIFT:
-                        modifiers |= MOD_RSHIFT;
-                        break;
-                    case SDLK_LSHIFT:
-                        modifiers |= MOD_LSHIFT;
-                        break;
-                    case SDLK_RCTRL:
-                        modifiers |= MOD_RCTRL;
-                        break;
-                    case SDLK_LCTRL:
-                        modifiers |= MOD_LCTRL;
-                        break;
-                    case SDLK_RALT:
-                        modifiers |= MOD_RALT;
-                        break;
-                    case SDLK_LALT:
-                        modifiers |= MOD_LALT;
-                        break;
-                    case SDLK_RGUI:
-                        modifiers |= MOD_RGUI;
-                        break;
-                    case SDLK_LGUI:
-                        modifiers |= MOD_LGUI;
-                        break;
-                    case SDLK_NUMLOCKCLEAR:
-                    case SDLK_CAPSLOCK:
-                        return;
-                    default: /* TODO: backspace, return */
-                        sym = event.key.keysym.sym;
-                        
-                        if ( (modifiers & MOD_SHIFT) && islower(sym) ) {
-                            keybuf.data[keybuf.count] = sym - 32;
-                        } else {
-                            keybuf.data[keybuf.count] = sym;
-                        }
-                        
-                        keybuf.count++;
-                        break;
-                }
-                break;
-            case SDL_KEYUP:
-                switch ( event.key.keysym.sym ) {
-                    case SDLK_RSHIFT:
-                        modifiers &= ~MOD_RSHIFT;
-                        break;
-                    case SDLK_LSHIFT:
-                        modifiers &= ~MOD_LSHIFT;
-                        break;
-                    case SDLK_RCTRL:
-                        modifiers &= ~MOD_RCTRL;
-                        break;
-                    case SDLK_LCTRL:
-                        modifiers &= ~MOD_LCTRL;
-                        break;
-                    case SDLK_RALT:
-                        modifiers &= ~MOD_RALT;
-                        break;
-                    case SDLK_LALT:
-                        modifiers &= ~MOD_LALT;
-                        break;
-                    case SDLK_RGUI:
-                        modifiers &= ~MOD_RGUI;
-                        break;
-                    case SDLK_LGUI:
-                        modifiers &= ~MOD_LGUI;
-                        break;
-                    default:
-                        break;
-                }
+                keybuf.data[keybuf.count++] = event.key.keysym.sym;
                 break;
             case SDL_MOUSEBUTTONDOWN:
                 mousebuf.data[mousebuf.count++] = event.button.button;
@@ -462,6 +395,8 @@ fill_input_buffers (void)
                 break;
         }
     }
+    
+    SDL_StopTextInput();
 }
 
 
@@ -640,4 +575,10 @@ void savescr(const char *file)
 void randomize(void)
 {
     srand((unsigned)time(NULL));
+}
+
+
+int getmod()
+{
+    return modifiers;
 }

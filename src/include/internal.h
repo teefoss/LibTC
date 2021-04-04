@@ -40,7 +40,6 @@ extern text_t   text;
 extern uchar    bordersize;
 extern int      base;
 extern int      bkcolor;
-extern int      modifiers;
 /*extern VIEWPORT vp;*/
 
 int     dos_clamp(int x, int min, int max);

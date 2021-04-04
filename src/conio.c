@@ -9,7 +9,6 @@
 
 queue_t keybuf;
 queue_t mousebuf;
-int     modifiers;
 
 /* move entire line at y = 'from' to y = 'to' */
 static void move_line(int from, int to)
@@ -400,7 +399,25 @@ int getch()
 int getche(void)
 {
     if ( keybuf.count ) {
-        return putch(keybuf.data[--keybuf.count]);
+        int key = keybuf.data[--keybuf.count];
+        
+        switch ( key ) {
+            case '\r':
+                text.info.curx = base;
+                break;
+            case '\b':
+                text.info.curx--;
+                if ( text.info.curx < base ) {
+                    text.info.curx = base;
+                }
+                break;
+            default:
+                if ( isprint(key) ) {
+                    putch(key);
+                }
+                break;
+        }
+        return key;
     }
     
     return EOF;

@@ -60,11 +60,16 @@ typedef enum
     MOD_RALT    = 0x0200,
     MOD_LGUI    = 0x0400,
     MOD_RGUI    = 0x0800,
-    MOD_CTRL    = MOD_LCTRL | MOD_RCTRL,
-    MOD_SHIFT   = MOD_LSHIFT | MOD_RSHIFT,
-    MOD_ALT     = MOD_LALT | MOD_RALT,
-    MOD_GUI     = MOD_LGUI | MOD_RGUI
+    MOD_NUM     = 0x1000,
+    MOD_CAPS    = 0x2000,
+    MOD_MODE    = 0x4000
 } KEYMOD;
+
+#define MOD_CTRL    (MOD_LCTRL | MOD_RCTRL)
+#define MOD_SHIFT   (MOD_LSHIFT | MOD_RSHIFT)
+#define MOD_ALT     (MOD_LALT | MOD_RALT)
+#define MOD_GUI     (MOD_LGUI | MOD_RGUI)
+
 
 typedef enum mouse_button
 {
