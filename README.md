@@ -21,3 +21,7 @@ LibDOS is some sort of MS-DOS-like terminal, using a partial implementation (onl
 
 - See the [wiki](https://github.com/teefoss/LibDOS/wiki)!
 - See the examples folder for sample programs.
+
+## Screenshots
+
+![collect game](https://github.com/teefoss/LibDOS/blob/master/screenshots/collect.png)
