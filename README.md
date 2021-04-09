@@ -4,7 +4,7 @@
 >
 > &mdash; <cite>Clark's Third Law</cite>
 
-LibDOS is some sort of MS-DOS-like terminal, using a partial implementation (only the fun parts) of Turbo C (Copyright (c) 1987, 1988 Borland International, Inc.).
+LibDOS is some sort of MS-DOS-like terminal, and an implementation of the console and graphics functions (the fun parts) of Turbo C (Copyright (c) 1987, 1988 Borland International, Inc.).
 
 **Development in progress.**
 
@@ -25,3 +25,4 @@ LibDOS is some sort of MS-DOS-like terminal, using a partial implementation (onl
 ## Screenshots
 
 ![collect game](https://github.com/teefoss/LibDOS/blob/master/screenshots/collect.png)
+![ascii characters](https://github.com/teefoss/LibDOS/blob/master/screenshots/ascii_80.png)
