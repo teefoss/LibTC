@@ -153,7 +153,7 @@ int main()
     setscreensize(BOARDSIZE, BOARDSIZE);
     setscale(10);
     setbordersize(1);
-    bordercolor(DARKGRAY);
+    setbordercolor(DARKGRAY);
     setcursor(0);
     
     initdos();
