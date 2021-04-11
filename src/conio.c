@@ -86,17 +86,12 @@ void clrscr()
             gotoxy(x, y);
             cell = dos_currentcell();
             *cell = LIGHTGRAY << 8;
+            dos_refresh_region(x, y, 1, 1);
         }
     }
     
     text.info.curx = 1;
-    text.info.cury = 1;
-    
-    /*dos_setcga(BLACK);*/
-    /*SDL_RenderClear(renderer); // target is screen texture */
-    w = text.info.winright - text.info.winleft + 1;
-    h = text.info.winbottom - text.info.wintop + 1;
-    dos_refresh_region(text.info.winleft, text.info.wintop, w, h);
+    text.info.cury = 1;    
 }
 
 

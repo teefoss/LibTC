@@ -5,8 +5,8 @@
 int main()
 {
     /* initialization options should come before calling initdos() */
-    setcursor(CURSOR_NONE);
-    setbordersize(0);
+    setscale(2);
+    setcursor(CURSOR_SOLID);
 
     initdos(); /* initialize LibDOS */
 
