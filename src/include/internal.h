@@ -2,10 +2,13 @@
 #define dos_internal_h
 
 #include "conio.h"
+#include <stdbool.h>
 #include <SDL2/SDL.h>
 
+#define VERSION     "0.1"
+
 #define TXTBUFSIZE  (text.info.screenwidth * text.info.screenheight * 2)
-#define QUEUE_SIZE  0x80
+#define STACK_SIZE  0x80
 #define MODE40H     8
 #define MODE80H     16
 
@@ -14,15 +17,18 @@
 #define CELL_BG(cell)  (((cell) & 0xF000) >> 12)
 #define CELL_FG(cell)  (((cell) & 0x0F00) >> 8)
 
+#define WINX2ABS(x) ((x) + text.info.winleft - 1)
+#define WINY2ABS(y) ((y) + text.info.wintop - 1)
+
 typedef enum { NO, YES } BOOL;
 typedef unsigned char   uchar;
 typedef unsigned short  ushort;
 
 typedef struct
 {
-    int count;
-    int data[QUEUE_SIZE];
-} queue_t;
+    int top;
+    int data[STACK_SIZE];
+} STACK;
 
 typedef struct
 {
@@ -34,13 +40,16 @@ typedef struct
 
 extern SDL_Renderer * renderer;
 
-extern queue_t  keybuf;
-extern queue_t  mousebuf;
+extern STACK  keybuf;
+extern STACK  mousebuf;
 extern text_t   text;
 extern uchar    bordersize;
-extern int      base;
 extern int      bkcolor;
 /*extern VIEWPORT vp;*/
+
+BOOL    dos_push(STACK * s, int data);
+int     dos_pop(STACK * s);
+void    dos_empty(STACK * s);
 
 int     dos_clamp(int x, int min, int max);
 int     dos_scale(void);
@@ -49,7 +58,6 @@ void    dos_drawchar(short cell, int x, int y);
 void    refresh_region(int x, int y, int w, int h);
 short * dos_cell(int x, int y); /* text buf cell at x, y */
 short * dos_currentcell(void); /* text buf cell for current cursor */
-short * coord_to_cell(int x, int y);
 int     dos_maxx(); /* text buffer cell x value */
 int     dos_maxy();
 

@@ -158,7 +158,6 @@ int  mousehit(void);
 int  mousex(void);
 int  mousey(void);
 int  getmouse(void);
-void setbase(int index);
 short *textbuffer(void);
 
 #endif /* conio_h_*/

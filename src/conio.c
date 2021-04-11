@@ -4,34 +4,37 @@
 
 #include <string.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 #define CLAMP(x,low,high)  (((x)>(high))?(high):(((x)<(low))?(low):(x)))
 
-queue_t keybuf;
-queue_t mousebuf;
+STACK keybuf;
+STACK mousebuf;
 
-/* move entire line at y = 'from' to y = 'to' */
+/* move line at y = 'from' to y = 'to' */
+/* from, to in win coords */
 static void move_line(int from, int to)
 {
     short   *dst, *src;
-    int     x;
+    int     x, w;
     
-    src = dos_cell(0, from - base);
-    dst = dos_cell(0, to - base);
+    x = WINX2ABS(text.info.curx) - 1;
+    src = dos_cell(x, WINY2ABS(from) - 1);
+    dst = dos_cell(x, WINY2ABS(to) - 1);
     
-    for ( x = 0; x < text.info.screenwidth; x++ ) {
+    w = text.info.winright - text.info.winleft + 1;
+    for ( x = 0; x < w; x++ ) {
         *dst++ = *src++;
-        
     }
     
-    refresh_region(base, from,  text.info.screenwidth, 1);
-    refresh_region(base, to,    text.info.screenwidth, 1);
+    refresh_region(WINX2ABS(text.info.curx), WINY2ABS(from), w, 1);
+    refresh_region(WINX2ABS(text.info.curx), WINY2ABS(to),   w, 1);
 }
 
 
 static void newline()
 {
-    text.info.curx = base;
+    text.info.curx = 1;
     
     if ( text.info.cury < dos_maxy() ) {
         text.info.cury++;
@@ -51,8 +54,9 @@ static void advancecursor(int amount)
 
 static void tab() /* TODO: tab size? */
 {
-    while ( text.info.curx % 4 != 0 )
+    while ( text.info.curx % 4 != 0 ) {
         advancecursor(1);
+    }
 }
 
 
@@ -64,30 +68,39 @@ void clreol(void)
     int i;
     
     cell = dos_currentcell();
-    x = text.info.curx - base;
-    y = text.info.cury - base;
-    count = text.info.screenwidth - x;
+    x = text.info.curx + text.info.winleft - 2;
+    y = text.info.cury + text.info.wintop - 2;
+    count = text.info.winright - text.info.winleft + 1;
     
-    for ( i = 0; i < count; i++, cell++ ) {
-        printf("x: %d\n", x);
+    for ( i = 0; i < count; i++, cell++, x++ ) {
         *cell &= 0xFF00; /* clear char info */
-        dos_drawchar(*cell, x++, y);
+        dos_drawchar(*cell, x, y);
     }
 }
 
 
 void clrscr()
 {
-    if ( text.buf ) {
-        memset(text.buf, 0, TXTBUFSIZE);
+    short *cell;
+    int x, y, w, h;
+    
+    for ( y = text.info.wintop; y <= text.info.winbottom; y++ ) {
+        for ( x = text.info.winleft; x <= text.info.winright; x++ ) {
+            gotoxy(x, y);
+            cell = dos_currentcell();
+            *cell = LIGHTGRAY << 8;
+        }
     }
     
     text.info.attribute = LIGHTGRAY;
-    text.info.curx = base;
-    text.info.cury = base;
+    text.info.curx = 1;
+    text.info.cury = 1;
     
-    dos_setcga(BLACK);
-    SDL_RenderClear(renderer); /* target is screen texture */
+    /*dos_setcga(BLACK);*/
+    /*SDL_RenderClear(renderer); // target is screen texture */
+    w = text.info.winright - text.info.winleft + 1;
+    h = text.info.winbottom - text.info.wintop + 1;
+    refresh_region(text.info.winleft, text.info.wintop, w, h);
 }
 
 
@@ -95,7 +108,8 @@ void delline()
 {
     short *     cell;
     int         max_row;
-    int         x, y;
+    int         x, y, w;
+    int         x1;
     
     /* move all following rows up by one */
     max_row = dos_maxy();
@@ -104,31 +118,33 @@ void delline()
     }
     
     /* clear the last line */
-    y = text.info.screenheight - 1;
-    cell = dos_cell(0, y);
-    for ( x = 0; x < text.info.screenwidth; x++ ) {
+    y = text.info.winbottom - 1;
+    x = text.info.winleft - 1;
+    cell = dos_cell(x, y);
+    w = dos_maxx();
+    for ( x1 = x; x1 < x + w; x1++ ) {
         *cell = text.info.attribute << 8;
-        dos_drawchar(*cell, x, y);
+        dos_drawchar(*cell, x1, y);
         cell++;
     }
 }
 
 
 /* check gettext and puttext coords */
-static int bad_coords(int left, int top, int right, int bottom)
+static BOOL bad_coords(int left, int top, int right, int bottom)
 {
-    if (left < base
-        || top < base
-        || right > dos_maxx()
-        || bottom > dos_maxy()) {
-        return 1;
+    if (left < 1
+        || top < 1
+        || right > text.info.screenwidth
+        || bottom > text.info.screenheight) {
+        return YES;
     }
     
     if ( left > right || top > bottom ) {
-        return 1;
+        return YES;
     }
     
-    return 0;
+    return NO;
 }
 
 
@@ -144,8 +160,8 @@ int gettext(int left, int top, int right, int bottom, void *destin)
         return 0;
     }
     
-    x = left - base;
-    y = top - base;
+    x = left - 1;
+    y = top - 1;
     w = right - left + 1;
     h = bottom - top + 1;
     cell = dos_cell(x, y);
@@ -160,12 +176,6 @@ int gettext(int left, int top, int right, int bottom, void *destin)
     }
     
     return 1;
-}
-
-
-short *gettextbuffer(void)
-{
-    return text.buf;
 }
 
 
@@ -187,10 +197,10 @@ void highvideo(void)
     text.info.attribute |= 0x8;
 }
 
-
+/* FIXME: ?*/
 void insline(void)
 {
-    int x, y;
+    int x, y, w, x1;
     short * cell;
     
     for ( y = dos_maxy() - 1; y >= text.info.cury; --y ) {
@@ -199,12 +209,14 @@ void insline(void)
     
     /* delete current line */
     
-    y = text.info.cury - base;
-    cell = dos_cell(0, y);
+    y = text.info.wintop - 1;
+    x = text.info.winleft - 1;
+    w = dos_maxx();
+    cell = dos_cell(x, y);
     
-    for ( x = 0; x < text.info.screenwidth; x++ ) {
+    for ( x1 = x; x1 < w; x1++ ) {
         *cell &= 0xFF00;
-        dos_drawchar(*cell, x, y);
+        dos_drawchar(*cell, x1, y);
         cell++;
     }
 }
@@ -258,10 +270,10 @@ int puttext(int left, int top, int right, int bottom, void *source)
     }
     
     src_cell = (short *)source;
-    x = left - base;
-    y = top - base;
-    r = right - base;
-    b = bottom - base;
+    x = left - 1;
+    y = top - 1;
+    r = right - 1;
+    b = bottom - 1;
 
     result = 0;
     for ( y1 = y; y1 <= b; y1++ ) {
@@ -316,6 +328,7 @@ void textmode(int newmode)
     
     text.info.screenheight = 25;
     text.info.currmode = newmode;
+    window(1, 1, text.info.screenwidth, text.info.screenheight);
     clrscr();
 }
 
@@ -331,7 +344,7 @@ int  wherey(void)
     return text.info.cury;
 }
 
-/* TODO: should have done this first! */
+
 void window(int left, int top, int right, int bottom)
 {
     if ( bad_coords(left, top, right, bottom) ) {
@@ -376,39 +389,41 @@ int mousey(void)
 
 int kbhit()
 {
-    return keybuf.count;
+    return keybuf.top + 1;
 }
 
 
 int mousehit()
 {
-    return mousebuf.count;
+    return mousebuf.top + 1;
 }
 
 
 int getch()
 {
-    if ( keybuf.count ) {
-        return keybuf.data[--keybuf.count];
+    if ( kbhit() ) {
+        return dos_pop(&keybuf);
     }
-    
+    /* TODO: wait for key */
     return EOF;
 }
 
 
 int getche(void)
 {
-    if ( keybuf.count ) {
-        int key = keybuf.data[--keybuf.count];
-        
+    int key;
+    
+    if ( kbhit() ) {
+        key = dos_pop(&keybuf);
+
         switch ( key ) {
             case '\r':
-                text.info.curx = base;
+                text.info.curx = 1;
                 break;
             case '\b':
                 text.info.curx--;
-                if ( text.info.curx < base ) {
-                    text.info.curx = base;
+                if ( text.info.curx < 1 ) {
+                    text.info.curx = 1;
                 }
                 break;
             default:
@@ -427,8 +442,8 @@ int getche(void)
 
 int getmouse()
 {
-    if ( mousebuf.count ) {
-        return mousebuf.data[--mousebuf.count];
+    if ( mousebuf.top >= 0 ) {
+        return dos_pop(&mousebuf);
     }
     
     return 0;
@@ -502,16 +517,16 @@ int cputs(const char *str)
 int putch(int c)
 {
     short * cell;
-    int x, y;
+    int bufx, bufy;
 
-    x = text.info.curx - base;
-    y = text.info.cury - base;
+    bufx = WINX2ABS(text.info.curx) - 1;
+    bufy = WINY2ABS(text.info.cury) - 1;
         
-    cell = &text.buf[y * text.info.screenwidth + x];
+    cell = &text.buf[bufy * text.info.screenwidth + bufx];
     *cell = (unsigned char)c;
     *cell |= text.info.attribute << 8;
     
-    dos_drawchar(*cell, x, y);
+    dos_drawchar(*cell, bufx, bufy);
     advancecursor(1);
     
     return c;
@@ -520,17 +535,7 @@ int putch(int c)
 
 int ungetch(int ch)
 {
-    if ( keybuf.count + 1 < QUEUE_SIZE ) {
-        return (keybuf.data[keybuf.count++] = ch);
-    }
-    
-    return EOF;
-}
-
-
-void setbase(int index)
-{
-    base = index;
+    return dos_push(&keybuf, ch) ? ch : EOF;
 }
 
 

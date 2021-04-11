@@ -6,8 +6,8 @@
 #include <time.h>
 #include <ctype.h>
 
-#define TEXTblink_INTERVAL     250
-#define CURSORblink_INTERVAL   150
+#define TEXT_BLINK_INTERVAL     250
+#define CURSOR_BLINK_INTERVAL   150
 
 static SDL_Window *     win;
 static SDL_Texture *    screen;
@@ -43,7 +43,33 @@ text_t text = {
     .char_h = MODE80H
 };
 
-int base = 1;
+
+BOOL dos_push(STACK * s, int data)
+{
+    if ( s->top == STACK_SIZE - 1 ) {
+        return NO;
+    }
+    
+    s->data[++s->top] = data;
+    return YES;
+}
+
+
+int dos_pop(STACK * s)
+{
+    if ( s->top < 0 ) {
+        printf("error: stack underflow\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    return s->data[s->top--];
+}
+
+
+void dos_empty(STACK * s)
+{
+    s->top = -1;
+}
 
 
 short * dos_cell(int x, int y)
@@ -54,31 +80,22 @@ short * dos_cell(int x, int y)
 
 short * dos_currentcell()
 {
-    int x = text.info.curx - base;
-    int y = text.info.cury - base;
-    
-    return dos_cell(x, y);
-}
-
-/* translate a cell coord to buffer index */
-short * coord_to_cell(int x, int y)
-{
-    int ix = x - base;
-    int iy = y - base;
-    
+    int x = text.info.curx + text.info.winleft - 2;
+    int y = text.info.cury + text.info.wintop - 2;
     return dos_cell(x, y);
 }
 
 
+/* max coord in current window */
 int dos_maxx()
 {
-    return text.info.screenwidth - 1 + base;
+    return text.info.winright - text.info.winleft + 1;
 }
 
 
 int dos_maxy()
 {
-    return text.info.screenheight - 1 + base;
+    return text.info.winbottom - text.info.wintop + 1;
 }
 
 
@@ -177,17 +194,17 @@ static void rendercursor(void)
 {
     SDL_Rect r;
     
-    r.x = (text.info.curx - base) * text.char_w;
+    r.x = (WINX2ABS(text.info.curx) - 1) * text.char_w;
+    r.y = (WINY2ABS(text.info.cury) - 1) * text.char_h;
     r.w = text.char_w;
     
     switch ( curstype ) {
         case CURSOR_NORMAL:
             r.h = text.char_h / 5;
-            r.y = ((text.info.cury - base) * text.char_h) + text.char_h - r.h;
+            r.y += text.char_h - r.h;
             break;
         case CURSOR_SOLID:
             r.h = text.char_h;
-            r.y = (text.info.cury - base) * text.char_h;
             break;
         default:
             break;
@@ -254,7 +271,7 @@ void dos_drawchar(short cell, int x, int y)
 }
 
 
-/* x, y: text coordinates */
+/* x, y: abs text coordinates */
 void refresh_region(int x, int y, int w, int h)
 {
     short * cell;
@@ -263,8 +280,8 @@ void refresh_region(int x, int y, int w, int h)
     
     for ( y1 = y; y1 < y + h; y1++ ) {
         for ( x1 = x; x1 < x + w; x1++ ) {
-            ix = x1 - base;
-            iy = y1 - base;
+            ix = x1 - 1;
+            iy = y1 - 1;
             cell = dos_cell(ix, iy);
             dos_drawchar(*cell, ix, iy);
         }
@@ -290,6 +307,8 @@ initwin (void)
         printf("initwin() failed: %s\n", SDL_GetError());
         quitdos();
     }
+    
+    printf("Init window with size (%d x %d).\n", w, h);
 }
 
 
@@ -304,6 +323,7 @@ initrenderer ()
     }
     
     SDL_RenderSetScale(renderer, dos_scale(), dos_scale());
+    printf("Init renderer with scale %d.\n", dos_scale());
 }
 
 
@@ -329,7 +349,7 @@ initscreen ()
         quitdos();
     }
     
-    printf("initialized screen with size %d x %d\n", w, h);
+    printf("Init screen with size (%d x %d).\n", w, h);
     
     screenrect.x = bordersize;
     screenrect.y = bordersize;
@@ -346,6 +366,8 @@ inittextbuffer (void)
 {
     text.buf = malloc(TXTBUFSIZE);
     clrscr();
+    printf("Init text buffer with size (%d x %d).\n",
+           text.info.screenwidth, text.info.screenheight);
 }
 
 
@@ -361,6 +383,7 @@ initsound (void)
     spec.callback = NULL;
 
     device = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
+    printf("Init sound.\n");
 }
 
 
@@ -371,48 +394,49 @@ fill_input_buffers (void)
     SDL_Event event;
     int sym;
 
-    keybuf.count = 0;
-    mousebuf.count = 0;
+    dos_empty(&keybuf);
+    dos_empty(&mousebuf);
+    
     modifiers = SDL_GetModState();
     
     while ( SDL_PollEvent(&event) ) {
-        
-        if ( keybuf.count == QUEUE_SIZE ) {
-            return;
-        }
-        
         switch ( event.type ) {
             case SDL_QUIT:
-                exit(0);
+                exit(EXIT_SUCCESS);
                 break;
             case SDL_KEYDOWN:
-                keybuf.data[keybuf.count++] = event.key.keysym.sym;
+                dos_push(&keybuf, event.key.keysym.sym);
                 break;
             case SDL_MOUSEBUTTONDOWN:
-                mousebuf.data[mousebuf.count++] = event.button.button;
+                dos_push(&mousebuf, event.button.button);
                 break;
             default:
                 break;
         }
     }
     
-    SDL_StopTextInput();
+    /* SDL_StopTextInput(); TODO: Text input? */
 }
 
 
 void
 initdos (void)
-{    
+{
+    printf("\nLibDOS v. "VERSION"\n");
+    printf("Thomas Foster (www.github/teefoss)\n\n");
+    
     if ( SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0 ) {
         printf("could not init sdl: %s\n", SDL_GetError());
         exit(1);
     }
+    printf("Init SDL2.\n");
     
     initwin();
     initrenderer();
     initscreen();
     inittextbuffer();
     initsound();
+    printf("Init complete.\n");
     
     refresh(); /* make sure the window appears */
     
@@ -439,6 +463,7 @@ quitdos (void)
     SDL_Quit();
 }
 
+
 void
 refresh (void)
 {
@@ -450,7 +475,7 @@ refresh (void)
     
     SDL_RenderCopy(renderer, screen, NULL, &screenrect);
 
-    if ( curstype != CURSOR_NONE && blink(CURSORblink_INTERVAL) ) {
+    if ( curstype != CURSOR_NONE && blink(CURSOR_BLINK_INTERVAL) ) {
         rendercursor();
     }
     
