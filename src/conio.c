@@ -89,7 +89,6 @@ void clrscr()
         }
     }
     
-    text.info.attribute = LIGHTGRAY;
     text.info.curx = 1;
     text.info.cury = 1;
     
@@ -326,7 +325,6 @@ void textmode(int newmode)
     text.info.screenheight = 25;
     text.info.currmode = newmode;
     window(1, 1, text.info.screenwidth, text.info.screenheight);
-    clrscr();
 }
 
 

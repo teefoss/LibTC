@@ -11,16 +11,15 @@ int main()
     setscale(3);
     setcursor(CURSOR_NONE);
     setname("ascii.c");
-    setbase(0);
-    
+
     initdos();
 
-    for ( int ch = 0; ch <= 255; ch++ )
-    {
-        gotoxy(ch % WIDTH, ch / WIDTH);
+    for ( int ch = 0; ch <= 255; ch++ ) {
+        gotoxy((ch % WIDTH) + 1, ch / WIDTH + 1);
         putch(ch);
     }
         
-    while ( 1 )
+    while ( 1 ) {
         refresh();
+    }
 }
