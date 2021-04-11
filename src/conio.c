@@ -8,9 +8,6 @@
 
 #define CLAMP(x,low,high)  (((x)>(high))?(high):(((x)<(low))?(low):(x)))
 
-STACK keybuf;
-STACK mousebuf;
-
 /* move line at y = 'from' to y = 'to' */
 /* from, to in win coords */
 static void move_line(int from, int to)
@@ -27,17 +24,17 @@ static void move_line(int from, int to)
         *dst++ = *src++;
     }
     
-    refresh_region(WINX2ABS(text.info.curx), WINY2ABS(from), w, 1);
-    refresh_region(WINX2ABS(text.info.curx), WINY2ABS(to),   w, 1);
+    dos_refresh_region(WINX2ABS(text.info.curx), WINY2ABS(from), w, 1);
+    dos_refresh_region(WINX2ABS(text.info.curx), WINY2ABS(to),   w, 1);
 }
 
 
 static void newline()
 {
-    text.info.curx = 1;
+    text.info.curx = text.info.winleft;
     
     if ( text.info.cury < dos_maxy() ) {
-        text.info.cury++;
+        text.info.cury++; /* scroll if at bottom */
     }
 }
 
@@ -100,7 +97,7 @@ void clrscr()
     /*SDL_RenderClear(renderer); // target is screen texture */
     w = text.info.winright - text.info.winleft + 1;
     h = text.info.winbottom - text.info.wintop + 1;
-    refresh_region(text.info.winleft, text.info.wintop, w, h);
+    dos_refresh_region(text.info.winleft, text.info.wintop, w, h);
 }
 
 

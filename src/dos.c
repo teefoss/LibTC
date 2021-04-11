@@ -23,6 +23,8 @@ static SDL_AudioDeviceID    device;
 
 unsigned char   bordersize = 4;
 SDL_Renderer *  renderer;
+STACK           keybuf;
+STACK           mousebuf;
 
 text_t text = {
     .buf = NULL,
@@ -272,7 +274,7 @@ void dos_drawchar(short cell, int x, int y)
 
 
 /* x, y: abs text coordinates */
-void refresh_region(int x, int y, int w, int h)
+void dos_refresh_region(int x, int y, int w, int h)
 {
     short * cell;
     int     ix, iy; /* text buffer indices */
@@ -530,6 +532,14 @@ void setscreensize(int width, int height)
 {
     text.info.screenwidth = (unsigned char)width;
     text.info.screenheight = (unsigned char)height;
+    
+    /* reset text window and cursor */
+    text.info.curx = 1;
+    text.info.cury = 1;
+    text.info.winleft = 1;
+    text.info.wintop = 1;
+    text.info.winright = width;
+    text.info.winbottom = height;
 }
 
 
