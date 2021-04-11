@@ -1,44 +1,36 @@
-//
-// program.c
-// example of a basic program
-//
-#include <dos.h>
-#include <conio.h>
-#include <stdlib.h>
-
-void display_message(int color, int count)
-{
-    clrscr();
-    gotoxy(1, 1);
-    textcolor(color);
-    
-    for ( int i = 0; i < count; i++ ) {
-        cprintf("This program doesn't do much.\n");
-    }
-}
+#include <dos.h> /* for initialization and basic library functions */
+#include <conio.h> /* for console input/output */
+#include <graphics.h> /* for graphics functions (drawing shapes, etc.) */
 
 int main()
 {
-    randomize();
-    initdos();
-    
-    display_message(LIGHTGRAY, 10);
-    
-    while ( 1 ) {
-        if ( kbhit() ) {
-            int key = getch();
+    /* initialization options should come before calling initdos() */
+    setcursor(CURSOR_NONE);
+    setbordersize(0);
 
-            switch ( key ) {
-                case 'c':
-                    display_message(rand() % 16, (rand() % 10) + 5);
-                    break;
-                case 'q':
-                    return 0;
-                default:
-                    break;
-            }
+    initdos(); /* initialize LibDOS */
+
+    /* main loop */
+    while ( 1 )
+    {
+        int key;
+        if ( kbhit() )
+            key = getch(); /* get a keystroke */
+
+        if ( key == 'p' )
+        {
+            textcolor(RED);
+            gotoxy(5, 5); /* move cursor position */
+            cprintf("Hello, world!"); /* display red text */
         }
-                
-        refresh();
+        else if ( key == 'c' )
+        {
+            clrscr(); /* clear the screen */
+        }
+
+        setcolor(LIGHTBLUE);
+        circle(64, 64, 48); /* draw a light blue circle at (64, 64) with radius 48. */
+
+        refresh(); /* make any changes appear */
     }
 }
