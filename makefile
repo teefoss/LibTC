@@ -2,12 +2,15 @@ TARGET=libdos.a
 CFLAGS=-Wall
 LIBS=-lSDL2
 INCL=-Iinclude -Isrc/include
-OBJS=dos.o conio.o graphics.o font.o
+OBJS=dos.o conio.o graphics.o font.o internal.o
 
 $(TARGET): $(OBJS)
 	ar rcs $(TARGET) $^
 
 %.o: src/%.c include/%.h src/include/internal.h
+	cc -c $< -o $@ $(INCL) $(CFLAGS)
+
+internal.o: src/internal.c src/include/internal.h
 	cc -c $< -o $@ $(INCL) $(CFLAGS)
 
 font.o: src/font.c

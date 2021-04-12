@@ -46,119 +46,12 @@ text_t text = {
 };
 
 
-BOOL dos_push(STACK * s, int data)
-{
-    if ( s->top == STACK_SIZE - 1 ) {
-        return NO;
-    }
-    
-    s->data[++s->top] = data;
-    return YES;
-}
-
-
-int dos_pop(STACK * s)
-{
-    if ( s->top < 0 ) {
-        printf("error: stack underflow\n");
-        exit(EXIT_FAILURE);
-    }
-    
-    return s->data[s->top--];
-}
-
-
-void dos_empty(STACK * s)
-{
-    s->top = -1;
-}
-
-
-short * dos_cell(int x, int y)
-{
-    return text.buf + (y * text.info.screenwidth + x);
-}
-
-
-short * dos_currentcell()
-{
-    int x = text.info.curx + text.info.winleft - 2;
-    int y = text.info.cury + text.info.wintop - 2;
-    return dos_cell(x, y);
-}
-
-
-/* max coord in current window */
-int dos_maxx()
-{
-    return text.info.winright - text.info.winleft + 1;
-}
-
-
-int dos_maxy()
-{
-    return text.info.winbottom - text.info.wintop + 1;
-}
-
-
-int dos_clamp(int x, int min, int max)
-{
-    if ( x < min )
-        x = min;
-    else if (x > max)
-        x = max;
-    
-    return x;
-}
-
-
 int dos_scale()
 {
     if ( text.info.currmode == BW40 || text.info.currmode == C40) {
         return scale + 1;
     }
     return scale;
-}
-
-
-static SDL_Color cgacolor(COLOR c)
-{
-    SDL_Color result;
-    int i;
-    
-    i = c & 8 ? 0x55 : 0;
-    
-    result.r = ((c & 4) >> 2) * 0xAA + i;
-    result.g = ((c & 2) >> 1) * 0xAA + i;
-    result.b = ((c & 1) >> 0) * 0xAA + i;
-    
-    if ( c == BROWN ) {
-        result.g -= 0x55; /* tweak dark yellow -> brown */
-    }
-    
-    return result;
-}
-
-
-void dos_setcga(COLOR c)
-{
-    SDL_Color set;
-    
-    switch ( text.info.currmode ) {
-        case BW40:
-        case BW80:
-            if ( c >= BLUE && c <= BROWN ) {
-                c = DARKGRAY;
-            } else if ( c >= LIGHTBLUE && c <= YELLOW ) {
-                c = LIGHTGRAY;
-            }
-            break;
-        default:
-            break;
-    }
-    
-    set = cgacolor(c);
-    SDL_SetRenderDrawColor(renderer, set.r, set.g, set.b, 255);
 }
 
 
@@ -220,7 +113,7 @@ static void rendercursor(void)
 }
 
 
-void dos_drawchar(short cell, int x, int y)
+void dos_drawchar(short cell, bufpt_t b)
 {
     unsigned char fg;
     unsigned char bg;
@@ -265,27 +158,25 @@ void dos_drawchar(short cell, int x, int y)
         for ( cx = start, draw_x = 0; cx != stop; cx += step ) {
             *data & (1 << cx) ? dos_setcga(fg) : dos_setcga(bg);
             SDL_RenderDrawPoint(renderer,
-                                x * text.char_w + draw_x++,
-                                y * text.char_h + cy);
+                                b.x * text.char_w + draw_x++,
+                                b.y * text.char_h + cy);
         }
         data++;
     }
 }
 
 
-/* x, y: abs text coordinates */
-void dos_refresh_region(int x, int y, int w, int h)
+void dos_refresh_region(conpt_t conpt, int w, int h)
 {
-    short * cell;
-    int     ix, iy; /* text buffer indices */
-    int     x1, y1;
+    short *     cell;
+    bufpt_t     i;
+    conpt_t     c;
     
-    for ( y1 = y; y1 < y + h; y1++ ) {
-        for ( x1 = x; x1 < x + w; x1++ ) {
-            ix = x1 - 1;
-            iy = y1 - 1;
-            cell = dos_cell(ix, iy);
-            dos_drawchar(*cell, ix, iy);
+    for ( c.y = conpt.y; c.y < conpt.y + h; c.y++ ) {
+        for ( c.x = conpt.x; c.x < conpt.x + w; c.x++ ) {
+            i = con_to_buf(c);
+            cell = dos_cell(i);
+            dos_drawchar(*cell, i);
         }
     }
 }
@@ -394,7 +285,6 @@ static void
 fill_input_buffers (void)
 {
     SDL_Event event;
-    int sym;
 
     dos_empty(&keybuf);
     dos_empty(&mousebuf);
