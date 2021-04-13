@@ -9,6 +9,8 @@
 #define TEXT_BLINK_INTERVAL     250
 #define CURSOR_BLINK_INTERVAL   150
 
+const unsigned char * fontdata = fontdata80; /* font data for current mode */
+
 static SDL_Window *     win;
 static SDL_Texture *    screen;
 static SDL_Rect         screenrect;
@@ -115,17 +117,9 @@ static void rendercursor(void)
 
 void dos_drawchar(short cell, bufpt_t b)
 {
-    unsigned char fg;
-    unsigned char bg;
+    unsigned char fg, bg;
     const unsigned char *data;
-    const unsigned char *fontdata;
-    int start; /* font data row draw order */
-    int stop;
-    int step;
-    extern const unsigned char fontdata40[];
-    extern const unsigned char fontdata80[];
-    int cx;
-    int cy;
+    int cx, cy;
     int draw_x;
     
     fg = CELL_FG(cell);
@@ -133,29 +127,14 @@ void dos_drawchar(short cell, bufpt_t b)
     
     if ( bg & 0x8 ) {
         bg &= ~0x8;
-        if ( ((SDL_GetTicks() / 250) % 2) == 0 ) {
+        if ( ((SDL_GetTicks() / TEXT_BLINK_INTERVAL) % 2) == 0 ) {
             fg = bg;
         }
     }
-    
-    /* the bits in fontdata40 are in reverse order to fontdata80 */
-    /* TODO: find data of matching format! */
-    if ( text.info.currmode == C40 || text.info.currmode == BW40 ) {
-        fontdata = fontdata40;
-        start = text.char_w - 1;
-        stop = -1;
-        step = -1;
-    } else { /* 80 */
-        fontdata = fontdata80;
-        start = 0;
-        stop = text.char_w;
-        step = 1;
-    }
-    
+        
     data = &fontdata[(CELL_CH(cell)) * text.char_h];
     for ( cy = 0; cy < text.char_h ; cy++ ) {
-        
-        for ( cx = start, draw_x = 0; cx != stop; cx += step ) {
+        for ( cx = text.char_w - 1, draw_x = 0; cx >= 0; cx-- ) {
             *data & (1 << cx) ? dos_setcga(fg) : dos_setcga(bg);
             SDL_RenderDrawPoint(renderer,
                                 b.x * text.char_w + draw_x++,

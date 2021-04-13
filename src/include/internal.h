@@ -49,6 +49,10 @@ typedef struct
 
 extern SDL_Renderer * renderer;
 
+extern const unsigned char   fontdata40[];
+extern const unsigned char   fontdata80[];
+extern const unsigned char * fontdata;
+
 extern STACK    keybuf;
 extern STACK    mousebuf;
 extern text_t   text;

@@ -321,11 +321,13 @@ void textmode(int newmode)
         case C40:
             text.char_h = MODE40H;
             text.info.screenwidth = 40;
+            fontdata = fontdata40;
             break;
         case BW80:
         case C80:
             text.char_h = MODE80H;
             text.info.screenwidth = 80;
+            fontdata = fontdata80;
             break;
         default:
             return; /* bad mode */
