@@ -1,10 +1,10 @@
-![The LibDOS logo. Max cool.](https://github.com/teefoss/LibDOS/blob/master/screenshots/logo.png)
+![The LibDOS logo. Max cool.](https://github.com/teefoss/LibTC/blob/master/screenshots/logo.png)
 
 > Any sufficiently advanced technology is indistinguishable from magic.
 >
 > &mdash; <cite>Clark's Third Law</cite>
 
-LibDOS is some sort of MS-DOS-like terminal, and an implementation of the console and graphics functions (the fun parts) of Turbo C (Copyright (c) 1987, 1988 Borland International, Inc.).
+LibTC is some sort of MS-DOS-like terminal, and an implementation of the console and graphics functions (the fun parts) of Turbo C (Copyright (c) 1987, 1988 Borland International, Inc.).
 
 **Development in progress.**
 
@@ -19,10 +19,10 @@ LibDOS is some sort of MS-DOS-like terminal, and an implementation of the consol
 
 ## Getting Started
 
-- See the [wiki](https://github.com/teefoss/LibDOS/wiki)!
+- See the [wiki](https://github.com/teefoss/LibTC/wiki)!
 - See the examples folder for sample programs.
 
 ## Screenshots
 
-![collect game](https://github.com/teefoss/LibDOS/blob/master/screenshots/collect.png)
-![ascii characters](https://github.com/teefoss/LibDOS/blob/master/screenshots/ascii_80.png)
+![collect game](https://github.com/teefoss/LibTC/blob/master/screenshots/collect.png)
+![ascii characters](https://github.com/teefoss/LibTC/blob/master/screenshots/ascii_80.png)
