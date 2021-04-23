@@ -20,7 +20,6 @@ void setscale(int newscale);
 void setscreensize(int width, int height);
 void sleep(unsigned seconds);
 void sound(unsigned frequency, unsigned milliseconds);
-
-void savescr(const char *file); /* FIXME */
+void savescr(const char *file);
 
 #endif /* dos_h_ */

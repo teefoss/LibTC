@@ -458,21 +458,28 @@ int getbordercolor()
 }
 
 
-void savescr(const char *file)
+void savescr(const char * file)
 {
-    SDL_Surface *save;
-
-    refresh();
-    save = SDL_GetWindowSurface(win);
+    SDL_Texture * target;
+    SDL_Surface * surface;
+    int w, h;
     
-    if ( save == NULL ) {
-        puts("savescr: could not create surface!");
-        return;
-    }
+    target = SDL_GetRenderTarget(renderer);
+    SDL_SetRenderTarget(renderer, screen);
+    SDL_QueryTexture(screen, NULL, NULL, &w, &h);
+    surface = SDL_CreateRGBSurface(0, w, h, 32, 0, 0, 0, 0);
     
-    if ( SDL_SaveBMP(save, file) != 0 ) {
-        printf("savescr: could not save bmp!");
+    SDL_RenderReadPixels(renderer,
+                         NULL,
+                         surface->format->format,
+                         surface->pixels,
+                         surface->pitch);
+    
+    if ( SDL_SaveBMP(surface, file) != 0 ) {
+        printf("savescr: could not save %s!\n", file);
     }
+    SDL_FreeSurface(surface);
+    SDL_SetRenderTarget(renderer, target);
 }
 
 
