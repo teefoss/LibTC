@@ -9,7 +9,6 @@ void delay(unsigned milliseconds);
 int  getbordercolor(void);
 int  getmod(void);
 void initdos(void);
-void quitdos(void);
 void randomize(void);
 void refresh(void);
 void setbordercolor(int color);
