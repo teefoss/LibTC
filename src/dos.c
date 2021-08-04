@@ -161,6 +161,26 @@ void dos_refresh_region(conpt_t conpt, int w, int h)
 }
 
 
+void
+quitdos (void)
+{
+    if ( winname ) {
+        free(winname);
+    }
+    
+    if ( text.buf ) {
+        free(text.buf);
+    }
+    
+    SDL_DestroyTexture(screen);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(win);
+    
+    SDL_CloseAudio();
+    SDL_Quit();
+}
+
+
 static void
 initwin (void)
 {
@@ -312,26 +332,6 @@ initdos (void)
     refresh(); /* make sure the window appears */
     
     atexit(quitdos);
-}
-
-
-void
-quitdos (void)
-{
-    if ( winname ) {
-        free(winname);
-    }
-    
-    if ( text.buf ) {
-        free(text.buf);
-    }
-    
-    SDL_DestroyTexture(screen);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(win);
-    
-    SDL_CloseAudio();
-    SDL_Quit();
 }
 
 

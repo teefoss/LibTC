@@ -14,7 +14,11 @@ int main()
 
     initdos();
 
-    textcolor(WHITE);
+    setbordercolor(LIGHTGRAY);
+    textbackground(LIGHTGRAY);
+    putch(' ');
+    
+    textcolor(DARKGRAY);
     for ( int i = 0; i < 16; i++ ) {
         gotoxy(i + 2, 1);
         cprintf("%X", i);
@@ -22,13 +26,18 @@ int main()
         cprintf("%X", i);
     }
     
-    textcolor(LIGHTGRAY);
+    textcolor(BLACK);
     for ( int ch = 0; ch <= 255; ch++ ) {
         gotoxy((ch % WIDTH) + 2, ch / WIDTH + 2);
         putch(ch);
     }
         
     while ( 1 ) {
+        if ( kbhit() ) {
+            if ( getch() == 's' ) {
+                savescr("ascii40.bmp");
+            }
+        }
         refresh();
     }
 }
