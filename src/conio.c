@@ -190,11 +190,12 @@ int gettext(int left, int top, int right, int bottom, void *destin)
 
 
 // TODO: this!
-int getscreench(int x, int y)
+unsigned char getscreench(int x, int y)
 {
-    short ch = text.buf + (y * text.info.screenwidth + x);
+    winpt_t winpt = { x, y };
+    bufpt_t bufpt = win_to_buf(winpt);
     
-    return CELL_CH(ch);
+    return *dos_cell(bufpt) & CH_MASK;
 }
 
 

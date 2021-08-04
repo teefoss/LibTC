@@ -126,7 +126,7 @@ void clreol(void);
 void clrscr(void);
 void delline(void);
 int  gettext(int left, int top, int right, int bottom, void *destin);
-int  getscreench(int x, int y);
+unsigned char getscreench(int x, int y);
 void gettextinfo(TEXT_INFO *r);
 void gotoxy(int x, int y);
 void highvideo(void);
