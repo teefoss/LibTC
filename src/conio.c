@@ -32,7 +32,7 @@ static void move_line(int from_y, int to_y)
     dos_refresh_region(win_to_con(to),   w, 1);
 }
 
-
+#if 0
 static void clear_current_window_line()
 {
     winpt_t w;
@@ -48,7 +48,7 @@ static void clear_current_window_line()
         *cell &= 0xFF00;
     }
 }
-
+#endif
 
 static void newline()
 {
@@ -189,7 +189,6 @@ int gettext(int left, int top, int right, int bottom, void *destin)
 }
 
 
-// TODO: this!
 unsigned char getscreench(int x, int y)
 {
     winpt_t winpt = { x, y };

@@ -2,7 +2,7 @@ TARGET=libdos.a
 CFLAGS=-Wall
 LIBS=-lSDL2
 INCL=-Iinclude -Isrc/include
-OBJS=dos.o conio.o graphics.o font.o internal.o test.o
+OBJS=dos.o conio.o graphics.o font.o internal.o
 
 $(TARGET): $(OBJS)
 	ar rcs $(TARGET) $^
