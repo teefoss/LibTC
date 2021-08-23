@@ -1,8 +1,4 @@
-![The LibDOS logo. Max cool.](https://github.com/teefoss/LibTC/blob/master/screenshots/logo.png)
-
-> Any sufficiently advanced technology is indistinguishable from magic.
->
-> &mdash; <cite>Clark's Third Law</cite>
+**For a more professional, modern version of this library, see [textmode](https://github.com/teefoss/textmode).**
 
 LibTC is some sort of MS-DOS-like terminal, and an implementation of the console and graphics functions (the fun parts) of Turbo C (Copyright (c) 1987, 1988 Borland International, Inc.).
 
